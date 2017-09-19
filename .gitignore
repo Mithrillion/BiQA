@@ -104,3 +104,4 @@ ENV/
 .json
 .csv
 .pkl
+data/
