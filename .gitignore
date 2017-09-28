@@ -100,11 +100,14 @@ ENV/
 # mypy
 .mypy_cache/
 
-# data
-.json
-.csv
-.pkl
+# datas
+*.json
+*.csv
+*.pkl
 data/
+rc_data/
+wordvecs/
+*.pth.tar
 
 # idea ide files
 .idea/
