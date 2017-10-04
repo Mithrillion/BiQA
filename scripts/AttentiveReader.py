@@ -99,12 +99,6 @@ class AttentiveReader(nn.Module):
             else:
                 init.orthogonal(p.data, gain)
 
-        # self._ym_layer.weight.data.uniform_(-init_range, init_range)
-        # self._um_layer.weight.data.uniform_(-init_range, init_range)
-
-        # self._rg_layer.weight.data.uniform_(-init_range, init_range)
-        # self._ug_layer.weight.data.uniform_(-init_range, init_range)
-
         self._output_layer.weight.data.uniform_(-init_range, init_range)
         self._output_layer.bias.data.fill_(0)
 
