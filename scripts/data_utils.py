@@ -24,7 +24,7 @@ def get_word_ids(doc, rnn_encode=False, max_length=100, nr_unk=100):
             # temporary dix
             # TODO: properly fix entity replacement
             num = int(re.search(r'\d+', token.text[7:]).group(0))
-            if 0 <= num < 500:
+            if 0 <= num < 600:
                 V[j] = num + 2
         if token.has_vector:
             X[j] = token.rank + 1
