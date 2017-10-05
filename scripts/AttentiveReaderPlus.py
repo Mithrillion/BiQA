@@ -12,6 +12,7 @@ class AttentiveReader(nn.Module):
                  hidden_size=128,
                  dropout=0.2,
                  max_grad_norm=10,
+                 pack=True,
                  opt=None):
         super(AttentiveReader, self).__init__()
 
@@ -22,7 +23,8 @@ class AttentiveReader(nn.Module):
         self._hidden_size = hidden_size
         self._dropout_rate = dropout
         self._emb_vector = emb_vectors
-        self._max_grad_norm = 10
+        self._max_grad_norm = max_grad_norm
+        self._pack = pack
         self.optimiser = opt
 
         # create layers
@@ -65,24 +67,29 @@ class AttentiveReader(nn.Module):
         q_var_emb = self._var_embedding_layer(question_vars)
         q_emb += q_var_emb
 
-        # pack sequences
-        s_emb = pack_padded_sequence(s_emb, story_len.data.numpy(), batch_first=True)
-        # TODO: check if all word indices are in range
+        if self._pack:
+            # pack sequences
+            s_emb = pack_padded_sequence(s_emb, story_len.data.numpy(), batch_first=True)
 
-        _, queries_len_order = torch.sort(question_len, descending=True)  # get order of question length
-        _, queries_inv_order = torch.sort(queries_len_order)
-        q_emb = q_emb.index_select(0, queries_len_order.cuda())  # sort embeddings in question length order
-        queries_len_ordered, _ = torch.sort(question_len, descending=True)  # get question lengths in sorted order
-        q_emb = pack_padded_sequence(q_emb, queries_len_ordered.data.cpu().numpy(), batch_first=True)
+            queries_len_ordered, queries_len_order = torch.sort(question_len, descending=True)
+            # ^^^ # get question lengths in sorted order, get order of question length
+            _, queries_inv_order = torch.sort(queries_len_order)
+            queries_len_order = queries_len_order.cuda()
+            queries_inv_order = queries_inv_order.cuda()
+            q_emb = q_emb.index_select(0, queries_len_order)  # sort embeddings in question length order
+            q_emb = pack_padded_sequence(q_emb, queries_len_ordered.data.numpy(), batch_first=True)
 
         y_out, _ = self._recurrent_layer(s_emb)  # batch * story_size * 2hidden_size
         _, q_hn = self._question_recurrent_layer(q_emb)  # _, batch * 2hidden_size
 
-        y_out, _ = pad_packed_sequence(y_out, batch_first=True)
+        if self._pack:
+            y_out, _ = pad_packed_sequence(y_out, batch_first=True)
 
         left = y_out.contiguous()
         q_hn = q_hn.permute(1, 0, 2).contiguous().view((batch_size, self._hidden_size * 2, 1))
-        q_hn = q_hn.index_select(0, queries_inv_order.cuda())  # batched rows -> reorder batches
+
+        if self._pack:
+            q_hn = q_hn.index_select(0, queries_inv_order)  # batched rows -> reorder batches
 
         ms = left.bmm(self._mix_matrix.unsqueeze(0).expand(batch_size,
                                                            self._hidden_size * 2,

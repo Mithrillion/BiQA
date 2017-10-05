@@ -16,12 +16,13 @@ seed = 7777
 np.random.seed(seed)
 torch.manual_seed(seed)
 
-batch_size = 16
+batch_size = 32
 hidden_size = 50
 n_epochs = 30
 var_size = 600
 learning_rate = 0.001
 resume = False
+pack = False
 
 
 def get_embeddings(vocab, nr_unk=100):
@@ -50,13 +51,12 @@ def save_checkpoint(state, is_best, filename='checkpoint.en.packed.pth.tar'):
         shutil.copyfile(filename, 'model_best.en.packed.pth.tar')
 
 
-# def to_cuda(var_list):
-#     return tuple(Variable(x.cuda(async=True), requires_grad=False) for x in var_list)
-
-
-def sort_batch(batch, sort_ind=2):
-    _, orders = torch.sort(batch[sort_ind], dim=0, descending=True)
-    return [x[orders] for x in batch]
+def sort_batch(batch, sort_ind=2, pack=True):
+    if pack:
+        _, orders = torch.sort(batch[sort_ind], dim=0, descending=True)
+        return [x[orders] for x in batch]
+    else:
+        return batch
 
 
 def validate(net, dev_loader):
@@ -65,11 +65,11 @@ def validate(net, dev_loader):
     outputs = []
     ys = []
     for batch in dev_loader:
-        s, q, sl, ql, sm, qm, sv, qv, t = sort_batch(batch)
+        s, q, sl, ql, sm, qm, sv, qv, t = sort_batch(batch, pack=pack)
         s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         sl = Variable(sl, requires_grad=False)
-        ql = Variable(ql.cuda(async=True), requires_grad=False)
+        ql = Variable(ql, requires_grad=False)
         sm = Variable(sm, requires_grad=False)
         qm = Variable(qm, requires_grad=False)
         sv = Variable(sv.type(torch.LongTensor).cuda(async=True), requires_grad=False)
@@ -105,20 +105,21 @@ def predict_in_domain(story_vars, out_proba):
 net = AttentiveReader(var_size, 2000, 50, emb_vectors,
                       dropout=0.2,
                       hidden_size=hidden_size,
-                      )
+                      pack=pack)
 net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), learning_rate)
 
 net.cuda()
 print("network initialised!")
 
+best_loss = np.inf
 if resume:
     print("loading saved states...")
     # resume test
-    saved_state = torch.load("./checkpoint.en.packed.pth.tar")
+    saved_state = torch.load("./model_best.en.packed.pth.tar")
     net.load_state_dict(saved_state['state_dict'])
+    best_loss = saved_state['epoch_val_loss']
 
 print("testing multi-step training!")
-best_loss = np.inf
 for epoch in range(n_epochs):
     print("epoch no.{0}".format(epoch + 1))
 
@@ -126,12 +127,11 @@ for epoch in range(n_epochs):
     cum_loss = 0
     for i, batch in enumerate(train_loader):
 
-        batch = sort_batch(batch)
-        s, q, sl, ql, sm, qm, sv, qv, y = batch
+        s, q, sl, ql, sm, qm, sv, qv, y = sort_batch(batch, pack=pack)
         s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         sl = Variable(sl, requires_grad=False)
-        ql = Variable(ql.cuda(async=True), requires_grad=False)
+        ql = Variable(ql, requires_grad=False)
         sm = Variable(sm, requires_grad=False)
         qm = Variable(qm, requires_grad=False)
         sv = Variable(sv.type(torch.LongTensor).cuda(async=True), requires_grad=False)
@@ -146,7 +146,7 @@ for epoch in range(n_epochs):
         if i % 100 == 1:
             net.eval()
             if i == 1:
-                cum_loss *= 100
+                cum_loss *= 50
             print("iteration {0}/{1}\ntraining loss =   {2:.10}".
                   format(i, len(train_loader), cum_loss / 100.))
             cum_loss = 0

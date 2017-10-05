@@ -138,11 +138,13 @@ if use_cuda:
     net.cuda()
 print("network initialised!")
 
+best_loss = np.inf
 if resume:
     print("loading saved states...")
     # resume test
-    saved_state = torch.load("./checkpoint.packed.pth.tar")
+    saved_state = torch.load("./model_best.packed.pth.tar")
     net.load_state_dict(saved_state['state_dict'])
+    best_loss = saved_state['epoch_val_loss']
 
 print("testing multi-step training!")
 ts = torch.from_numpy(stories).pin_memory()
@@ -163,7 +165,6 @@ else:
     dq_len = None
 
 net.train()
-best_loss = np.inf
 for epoch in range(n_epochs):
     print("epoch no.{0}".format(epoch + 1))
 
