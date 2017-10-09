@@ -42,13 +42,6 @@ class AttentiveReader(nn.Module):
         # variable embeddings
         self._embedding_layer = nn.Embedding(emb_vectors.shape[0], emb_vectors.shape[1], 0)
 
-
-        if not emb_trainable:
-            self._embedding_layer.weight.requires_gard = False
-        # ^^^ size = entities + ph + non-ent-marker
-        # DONE: initialise non-zero locations
-        # TODO: randomise in forward step?
-
         self._dropout = nn.Dropout(dropout)
         self._recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, story_rec_layers,
                                        batch_first=True,
@@ -72,6 +65,11 @@ class AttentiveReader(nn.Module):
         unk_n_var /= torch.norm(unk_n_var, p=2, dim=1).unsqueeze(1)  # normalise randomly initialised embeddings
         # ^^^ init unk * 100 embeddings
         self._embedding_layer.weight.data[0, :] = 0
+        if not self._emb_trainable:
+            self._embedding_layer.weight.requires_gard = False
+        # ^^^ size = entities + ph + non-ent-marker
+        # DONE: initialise non-zero locations
+        # TODO: randomise in forward step?
 
         gain = init.calculate_gain('tanh')
         for p in self._recurrent_layer.parameters():
