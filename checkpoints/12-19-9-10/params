@@ -1,0 +1,10 @@
+batch_size = 32
+hidden_size = 128
+n_epochs = 30
+var_size = 600
+dropout = 0
+learning_rate = 0.001
+story_rec_layers = 2
+resume = False
+pack = False
+emb_trainable = False

@@ -108,6 +108,9 @@ data/
 rc_data/
 wordvecs/
 *.pth.tar
+vecmap/
+bilingual_vector/
+alignment/
 
 # idea ide files
 .idea/

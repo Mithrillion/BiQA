@@ -23,8 +23,8 @@ torch.manual_seed(seed)
 batch_size = 32
 n_epochs = 30
 use_cuda = True
-resume = True
-pack = True
+resume = False
+pack = False
 
 stories = np.load("../rc_data/train_stories.npy").astype(np.long)
 queries = np.load("../rc_data/train_queries.npy").astype(np.long)

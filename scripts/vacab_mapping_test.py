@@ -1,8 +1,7 @@
 import numpy as np
 import re
-import torch.utils.data as tud
-import torch
-import shutil
+import pandas as pd
+import spacy
 
 
 def get_word_ids(doc, rnn_encode=False, max_length=100, nr_unk=100, nr_var=600, dic=None):
@@ -39,37 +38,9 @@ def get_word_ids(doc, rnn_encode=False, max_length=100, nr_unk=100, nr_var=600, 
     return X, V
 
 
-class QADataset(tud.Dataset):
-    def __init__(self, data_df, nlp, dic):
-        self.data_df = data_df
-        self.nlp = nlp
-        self.dic = dic
-
-    def __len__(self):
-        return self.data_df.shape[0]
-
-    def __getitem__(self, i):
-
-        story = self.nlp(self.data_df['story'].iloc[i].lower(), parse=False, tag=False, entity=False)
-        s, s_var = get_word_ids(story, max_length=2000, dic=self.dic)
-        s_len = np.sum(s != 0)
-
-        question = self.nlp(self.data_df['question'].iloc[i].lower(), parse=False, tag=False, entity=False)
-        q, q_var = get_word_ids(question, max_length=50, dic=self.dic)
-        q_len = np.sum(q != 0)
-
-        answer = int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))
-
-        # # TODO: REMOVE DEBUG!
-        # if q_len <= 0:
-        #     raise RuntimeError('Question zero length!, ID={0}'.format(i))
-
-        return s, q, s_len, q_len, s_var, q_var, answer
-
-
 def get_embeddings(vocab, nr_unk=100, nr_var=600):
     # nr_vector = max(lex.rank for lex in vocab) + 1
-    nr_vector = np.sum([x.has_vector for x in vocab])
+    nr_vector = np.sum([x.has_vector for x in nlp.vocab])
     vectors = np.zeros((nr_vector + nr_unk + nr_var + 2, vocab.vectors_length), dtype='float32')
     dic = dict()
     i = 0
@@ -81,17 +52,18 @@ def get_embeddings(vocab, nr_unk=100, nr_var=600):
     return vectors, dic
 
 
-def save_checkpoint(state, is_best, filename='checkpoint.en.packed.pth.tar',
-                    best_name='model_best.en.packed.pth.tar'):
-    torch.save(state, filename)
-    if is_best:
-        shutil.copyfile(filename, best_name)
-
-
-def sort_batch(batch, sort_ind=2, pack=True):
-    if pack:
-        _, orders = torch.sort(batch[sort_ind], dim=0, descending=True)
-        return [x[orders] for x in batch]
-    else:
-        return batch
-
+nlp = spacy.load('en')
+with open("../wordvecs/wiki.en/wiki.en.small.vec", "r") as f:
+    nlp.vocab.load_vectors(f)
+emb, dic = get_embeddings(nlp.vocab)
+dat = pd.read_pickle("../input_data/dev_en.pkl")
+temp = nlp(dat['question'][1].lower())
+print(temp)
+print(temp[2])
+print(temp[2].vector, temp[2].vector.shape)
+print(emb.shape)
+X, V = get_word_ids(temp, max_length=50, dic=dic)
+print(list(X))
+print(list(V))
+print(emb[X[2], :] / (temp[2].vector / temp[2].vector_norm))
+print()

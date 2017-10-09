@@ -4,12 +4,11 @@ import torch
 import torch.utils.data as tud
 import torch.nn as nn
 from torch.autograd import Variable
-import torch.optim as optim
 from AttentiveReaderPlus import AttentiveReader
 from sklearn.metrics import accuracy_score
 from data_utils import QADataset, get_embeddings, save_checkpoint, sort_batch
-import shutil
 import spacy
+import pickle
 
 
 seed = 7777
@@ -20,10 +19,10 @@ batch_size = 32
 hidden_size = 128
 n_epochs = 30
 var_size = 600
-dropout = 0.2
-learning_rate = 0.1
-story_rec_layers = 1
-resume = False
+dropout = 0
+learning_rate = 0.001
+story_rec_layers = 2
+resume = True
 pack = False
 emb_trainable = False
 
@@ -33,10 +32,7 @@ with open("../wordvecs/wiki.en/wiki.en.small.vec", "r") as f:
     nlp.vocab.load_vectors(f)
 emb_vectors, dic = get_embeddings(nlp.vocab, nr_unk=100)
 
-train = pd.read_pickle("../input_data/train_en.pkl")
 dev = pd.read_pickle("../input_data/dev_en.pkl")
-train_loader = tud.DataLoader(QADataset(train, nlp, dic), batch_size=batch_size, pin_memory=True,
-                              num_workers=3, shuffle=True)
 dev_loader = tud.DataLoader(QADataset(dev, nlp, dic), batch_size=batch_size, pin_memory=True, num_workers=3)
 
 
@@ -64,7 +60,7 @@ def validate(net, dev_loader):
     combined_outputs = np.concatenate(outputs, 0)
     ys = np.concatenate(ys, 0)
     acc_score = accuracy_score(combined_outputs, ys)
-    return loss_score, acc_score
+    return loss_score, acc_score, combined_outputs, ys
 
 
 def predict_in_domain(story_vars, out_logits):
@@ -86,59 +82,19 @@ net = AttentiveReader(var_size, 2000, 50, emb_vectors,
                       emb_trainable=emb_trainable,
                       story_rec_layers=story_rec_layers)
 # net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), learning_rate)
-net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=learning_rate)
 
 net.cuda()
 print("network initialised!")
 
-best_loss = np.inf
 if resume:
     print("loading saved states...")
     # resume test
-    saved_state = torch.load("./model_best.en.packed.pth.tar")
+    saved_state = torch.load("./checkpoint.en.packed.pth.tar")
     net.load_state_dict(saved_state['state_dict'])
-    best_loss = saved_state['epoch_val_loss']
 
-print("testing multi-step training!")
-for epoch in range(n_epochs):
-    print("epoch no.{0}".format(epoch + 1))
-
-    i = 0
-    cum_loss = 0
-    for i, batch in enumerate(train_loader):
-
-        s, q, sl, ql, sv, qv, y = sort_batch(batch, pack=pack)
-        s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
-        q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
-        sl = Variable(sl, requires_grad=False)
-        ql = Variable(ql, requires_grad=False)
-        y = Variable(y.type(torch.LongTensor).cuda(async=True), requires_grad=False)
-        xy = (s, q, sl, ql, y)
-
-        net.train()
-        loss, out = net.train_on_batch(xy)
-        cum_loss += loss.cpu().numpy()[0]
-
-        if i % 100 == 1:
-            net.eval()
-            if i == 1:
-                cum_loss *= 50
-            print("iteration {0}/{1}\ntraining loss =   {2:.10}".
-                  format(i, len(train_loader), cum_loss / 100.))
-            cum_loss = 0
-        if i % 1000 == 1 or i == len(train_loader) - 1:
-            net.eval()
-            val_loss, acc = validate(net, dev_loader)
-            print("validation loss = {0:.10}, validation accuracy = {1:.5}".
-                  format(val_loss, acc))
-            checkpoint_val_loss = val_loss
-            is_best = checkpoint_val_loss < best_loss
-            if is_best:
-                best_loss = checkpoint_val_loss
-            # print("checkpoint loss = {0:.10}".format(checkpoint_val_loss))
-            save_checkpoint({
-                'epoch': epoch,
-                'batch': i,
-                'state_dict': net.state_dict(),
-                'epoch_val_loss': checkpoint_val_loss
-            }, is_best)
+print("Validating results!")
+net.eval()
+loss_score, acc_score, combined_outputs, ys = validate(net, dev_loader)
+print("validation loss = {0:.10}, validation accuracy = {1:.5}".
+      format(loss_score, acc_score))
+pickle.dump((combined_outputs, ys), open("../data/diagnostic_ys.pkl", "wb"))

@@ -12,12 +12,19 @@ class AttentiveReader(nn.Module):
                  hidden_size=128,
                  dropout=0.2,
                  max_grad_norm=10,
+                 nr_unk=100,
                  pack=True,
+                 emb_trainable=True,
+                 gru_init_std=0.1,
+                 init_range=0.01,
+                 story_rec_layers=1,
                  opt=None):
         super(AttentiveReader, self).__init__()
 
         # setting attributes
         self._var_size = var_size
+        self._gru_init_std = gru_init_std
+        self._init_range = init_range
         self._story_size = story_max_len
         self._question_size = question_max_len
         self._hidden_size = hidden_size
@@ -25,23 +32,25 @@ class AttentiveReader(nn.Module):
         self._emb_vector = emb_vectors
         self._max_grad_norm = max_grad_norm
         self._pack = pack
+        self._nr_unk = nr_unk
+        self._emb_trainable = emb_trainable
+        self._story_rec_layers = story_rec_layers
         self.optimiser = opt
 
         # create layers
 
         # variable embeddings
         self._embedding_layer = nn.Embedding(emb_vectors.shape[0], emb_vectors.shape[1], 0)
-        self._embedding_layer.weight.data.copy_(torch.from_numpy(emb_vectors))
-        # self._embedding_layer.weight.data[:emb_vectors.shape[0], :] = torch.from_numpy(emb_vectors)
-        self._embedding_layer.weight.requires_gard = False
 
-        self._var_embedding_layer = nn.Embedding(var_size + 2, emb_vectors.shape[1], 0)
+
+        if not emb_trainable:
+            self._embedding_layer.weight.requires_gard = False
         # ^^^ size = entities + ph + non-ent-marker
         # DONE: initialise non-zero locations
         # TODO: randomise in forward step?
 
         self._dropout = nn.Dropout(dropout)
-        self._recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, 1,
+        self._recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, story_rec_layers,
                                        batch_first=True,
                                        bidirectional=True)
         self._question_recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, 1,
@@ -50,22 +59,44 @@ class AttentiveReader(nn.Module):
         self._output_layer = nn.Linear(hidden_size * 2, var_size)
         self._mix_matrix = nn.Parameter(torch.zeros((hidden_size * 2, hidden_size * 2)))
 
-        # fix embedding of non-entities and paddings to zero
-        self._var_embedding_layer.weight.data[0, :] = 0
-        # self._embedding_layer.weight.data[0, :] = 0
+        self.init_weights()
+
+    def init_weights(self):
+        init_range = self._init_range
+        init_std = self._gru_init_std
+
+        self._embedding_layer.weight.data.copy_(torch.from_numpy(self._emb_vector))
+        # self._embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :].normal_(0, 1)
+        unk_n_var = self._embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :]
+        init.normal(unk_n_var, 0, 1)
+        unk_n_var /= torch.norm(unk_n_var, p=2, dim=1).unsqueeze(1)  # normalise randomly initialised embeddings
+        # ^^^ init unk * 100 embeddings
+        self._embedding_layer.weight.data[0, :] = 0
+
+        gain = init.calculate_gain('tanh')
+        for p in self._recurrent_layer.parameters():
+            if p.dim() == 1:
+                p.data.normal_(0, init_std)
+            else:
+                init.orthogonal(p.data, gain)
+        for p in self._question_recurrent_layer.parameters():
+            if p.dim() == 1:
+                p.data.normal_(0, init_std)
+            else:
+                init.orthogonal(p.data, gain)
+
+        self._output_layer.weight.data.uniform_(-init_range, init_range)
+        self._output_layer.bias.data.fill_(0)
+
+        self._mix_matrix.data.uniform_(-init_range, init_range)
 
     def forward(self, batch):
-        story, question, story_len, question_len, story_vocab_mask, question_vocab_mask, \
-            story_vars, question_vars = batch
+        story, question, story_len, question_len = batch
         batch_size = story.size()[0]
 
-        s_emb = self._embedding_layer(story)
-        s_var_emb = self._var_embedding_layer(story_vars)
-        s_emb += s_var_emb
+        s_emb = self._dropout(self._embedding_layer(story))
 
-        q_emb = self._embedding_layer(question)
-        q_var_emb = self._var_embedding_layer(question_vars)
-        q_emb += q_var_emb
+        q_emb = self._dropout(self._embedding_layer(question))
 
         if self._pack:
             # pack sequences
@@ -85,15 +116,16 @@ class AttentiveReader(nn.Module):
         if self._pack:
             y_out, _ = pad_packed_sequence(y_out, batch_first=True)
 
-        left = y_out.contiguous()
+        # left = y_out.contiguous()  #  seems to be no longer needed
+
         q_hn = q_hn.permute(1, 0, 2).contiguous().view((batch_size, self._hidden_size * 2, 1))
 
         if self._pack:
             q_hn = q_hn.index_select(0, queries_inv_order)  # batched rows -> reorder batches
 
-        ms = left.bmm(self._mix_matrix.unsqueeze(0).expand(batch_size,
-                                                           self._hidden_size * 2,
-                                                           self._hidden_size * 2))  # batched matrix
+        ms = y_out.bmm(self._mix_matrix.unsqueeze(0).expand(batch_size,
+                                                            self._hidden_size * 2,
+                                                            self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
         ss = F.softmax(ms)
 
@@ -119,8 +151,8 @@ class AttentiveReader(nn.Module):
         return F.softmax(out)
 
     def _reset_nil_gradients(self):
-        self._var_embedding_layer.weight.grad[0, :] = 0
-        # self._embedding_layer.weight.data[0, :] = 0
+        if self._emb_trainable:
+            self._embedding_layer.weight.data[0, :] = 0
 
     @staticmethod
     def softmax(inputs, axis=1):
