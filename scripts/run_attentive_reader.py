@@ -8,7 +8,6 @@ import torch.optim as optim
 from AttentiveReaderPlus import AttentiveReader
 from sklearn.metrics import accuracy_score
 from data_utils import QADataset, get_embeddings, save_checkpoint, sort_batch
-import shutil
 import spacy
 
 
@@ -21,23 +20,25 @@ hidden_size = 128
 n_epochs = 30
 var_size = 600
 dropout = 0.2
-learning_rate = 0.1
+learning_rate = 0.001
 story_rec_layers = 1
 resume = False
 pack = False
 emb_trainable = False
+lang = 'es'
 
 
-nlp = spacy.load('en')
-with open("../wordvecs/wiki.en/wiki.en.small.vec", "r") as f:
-    nlp.vocab.load_vectors(f)
-emb_vectors, dic = get_embeddings(nlp.vocab, nr_unk=100)
+nlp = spacy.load(lang, vectors=False)
+# load new vectors
+with open("../bilingual_vector/original/wiki.{0}.small.vec".format(lang), "r") as f:
+    emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600)
+print("embedding loaded!")
 
-train = pd.read_pickle("../input_data/train_en.pkl")
-dev = pd.read_pickle("../input_data/dev_en.pkl")
-train_loader = tud.DataLoader(QADataset(train, nlp, dic), batch_size=batch_size, pin_memory=True,
+train = pd.read_pickle("../input_data/train_{0}.pkl".format(lang))
+dev = pd.read_pickle("../input_data/dev_{0}.pkl".format(lang))
+train_loader = tud.DataLoader(QADataset(train, nlp, rev_dic), batch_size=batch_size, pin_memory=True,
                               num_workers=3, shuffle=True)
-dev_loader = tud.DataLoader(QADataset(dev, nlp, dic), batch_size=batch_size, pin_memory=True, num_workers=3)
+dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic), batch_size=batch_size, pin_memory=True, num_workers=3)
 
 
 def validate(net, dev_loader):
@@ -85,22 +86,26 @@ net = AttentiveReader(var_size, 2000, 50, emb_vectors,
                       pack=pack,
                       emb_trainable=emb_trainable,
                       story_rec_layers=story_rec_layers)
-# net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), learning_rate)
-net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=learning_rate)
+net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), learning_rate)
+# net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=learning_rate)
 
 net.cuda()
 print("network initialised!")
 
 best_loss = np.inf
+init_epoch = 0
 if resume:
     print("loading saved states...")
     # resume test
-    saved_state = torch.load("./model_best.en.packed.pth.tar")
+    saved_state = torch.load("./checkpoint.{0}.packed.pth.tar".format(lang))
+    best_state = torch.load("./model_best.{0}.packed.pth.tar".format(lang))
     net.load_state_dict(saved_state['state_dict'])
-    best_loss = saved_state['epoch_val_loss']
+    init_epoch = saved_state['epoch']
+    best_loss = best_state['epoch_val_loss']
+    del best_state
 
 print("testing multi-step training!")
-for epoch in range(n_epochs):
+for epoch in range(init_epoch, n_epochs):
     print("epoch no.{0}".format(epoch + 1))
 
     i = 0
@@ -136,9 +141,13 @@ for epoch in range(n_epochs):
             if is_best:
                 best_loss = checkpoint_val_loss
             # print("checkpoint loss = {0:.10}".format(checkpoint_val_loss))
-            save_checkpoint({
-                'epoch': epoch,
-                'batch': i,
-                'state_dict': net.state_dict(),
-                'epoch_val_loss': checkpoint_val_loss
-            }, is_best)
+            save_checkpoint(
+                {
+                    'epoch': epoch,
+                    'batch': i,
+                    'state_dict': net.state_dict(),
+                    'epoch_val_loss': checkpoint_val_loss
+                },
+                is_best,
+                filename='checkpoint.{0}.packed.pth.tar'.format(lang),
+                best_name='model_best.{0}.packed.pth.tar'.format(lang))

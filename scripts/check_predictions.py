@@ -19,9 +19,9 @@ batch_size = 32
 hidden_size = 128
 n_epochs = 30
 var_size = 600
-dropout = 0
+dropout = 0.2
 learning_rate = 0.001
-story_rec_layers = 2
+story_rec_layers = 1
 resume = True
 pack = False
 emb_trainable = False
@@ -32,7 +32,7 @@ with open("../wordvecs/wiki.en/wiki.en.small.vec", "r") as f:
     nlp.vocab.load_vectors(f)
 emb_vectors, dic = get_embeddings(nlp.vocab, nr_unk=100)
 
-dev = pd.read_pickle("../input_data/dev_en.pkl")
+dev = pd.read_pickle("../input_data/test_en.pkl")
 dev_loader = tud.DataLoader(QADataset(dev, nlp, dic), batch_size=batch_size, pin_memory=True, num_workers=3)
 
 
