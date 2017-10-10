@@ -1,0 +1,1 @@
+../vecmap/normalize_embeddings.py
