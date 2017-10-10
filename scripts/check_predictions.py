@@ -22,18 +22,20 @@ var_size = 600
 dropout = 0.2
 learning_rate = 0.001
 story_rec_layers = 1
-resume = True
+resume = False
 pack = False
 emb_trainable = False
+lang = 'en'
 
 
 nlp = spacy.load('en')
-with open("../wordvecs/wiki.en/wiki.en.small.vec", "r") as f:
-    nlp.vocab.load_vectors(f)
-emb_vectors, dic = get_embeddings(nlp.vocab, nr_unk=100)
+# load new vectors
+with open("../bilingual_vector/original/wiki.{0}.small.vec".format(lang), "r") as f:
+    emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600)
+print("embedding loaded!")
 
 dev = pd.read_pickle("../input_data/test_en.pkl")
-dev_loader = tud.DataLoader(QADataset(dev, nlp, dic), batch_size=batch_size, pin_memory=True, num_workers=3)
+dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic), batch_size=batch_size, pin_memory=True, num_workers=3)
 
 
 def validate(net, dev_loader):
