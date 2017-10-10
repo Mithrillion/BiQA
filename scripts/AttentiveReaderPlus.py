@@ -54,6 +54,7 @@ class AttentiveReader(nn.Module):
         self._question_recurrent_layer = nn.GRU(projection_size, hidden_size, 1,
                                                 batch_first=True,
                                                 bidirectional=True)
+
         self._output_layer = nn.Linear(hidden_size * 2, var_size)
         self._mix_matrix = nn.Parameter(torch.zeros((hidden_size * 2, hidden_size * 2)))
 
