@@ -1,0 +1,8 @@
+source activate py36
+echo "Normalising English embeddings..."
+python normalize_embeddings.py unit center -i original/wiki.en.small.vec -o standardised/wiki.en.small.vec
+echo "Normalising Spanish embeddings..."
+python normalize_embeddings.py unit center -i original/wiki.es.small.vec -o standardised/wiki.es.small.vec
+echo "Mapping embeddings..."
+python3 map_embeddings.py --orthogonal standardised/wiki.en.small.vec standardised/wiki.es.small.vec mapped/wiki.en.small.vec mapped/wiki.es.small.vec -d dictionary/en-es.dic
+echo "Complete."
