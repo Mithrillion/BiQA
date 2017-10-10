@@ -91,12 +91,13 @@ def get_embeddings(f, nr_unk=100, nr_var=600):
     line = f.readline()
     while line:
         parts = line.split(" ")
-        if len(parts) != ndim + 2:
+        if len(parts) != ndim + 1 and len(parts) != ndim + 2:
             print(line)
-            raise ValueError("Vector size mismatch!")
+            raise ValueError("Vector size mismatch! Got {0}, expected {1} (+1)!".
+                             format(len(parts), ndim + 1))
         else:
             word = parts[0]
-            vec = np.array(parts[1:-1]).astype(np.float32)
+            vec = np.array(parts[1: 1 + ndim]).astype(np.float32)
             vectors[i + nr_unk + nr_var + 2, :] = vec / np.linalg.norm(vec)
             dic[i] = word
             i += 1
