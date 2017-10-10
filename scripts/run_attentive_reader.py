@@ -25,7 +25,7 @@ story_rec_layers = 1
 resume = False
 pack = False
 emb_trainable = False
-lang = 'es'
+lang = 'en'
 
 
 nlp = spacy.load(lang, vectors=False)

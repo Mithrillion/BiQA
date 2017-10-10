@@ -5,7 +5,7 @@ import torch
 import shutil
 
 
-def get_word_ids(doc, rnn_encode=False, max_length=100, nr_unk=100, nr_var=600, rev_dic=None):
+def get_word_ids(doc, rnn_encode=True, max_length=100, nr_unk=100, nr_var=600, rev_dic=None):
     queue = list(doc)
     X = np.zeros(max_length, dtype='int32')
     # M = np.zeros(max_length, dtype='int32')
