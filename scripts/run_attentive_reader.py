@@ -26,12 +26,14 @@ resume = False
 pack = False
 emb_trainable = False
 lang = 'en'
+# use glove 6B
 
 
 nlp = spacy.load(lang, vectors=False)
 # load new vectors
-with open("../bilingual_vector/original/wiki.{0}.small.vec".format(lang), "r") as f:
-    emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600)
+# with open("../bilingual_vector/original/wiki.{0}.small.vec".format(lang), "r") as f:
+with open("../rc_data/processed/glove.6B/glove.6B.100d.txt".format(lang), "r") as f:
+    emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600, meta="400000 100")
 print("embedding loaded!")
 
 train = pd.read_pickle("../input_data/train_{0}.pkl".format(lang))
