@@ -81,8 +81,11 @@ class QADataset(tud.Dataset):
 #     return vectors, dic
 
 
-def get_embeddings(f, nr_unk=100, nr_var=600):
-    nr_vector, ndim = f.readline().split(" ")
+def get_embeddings(f, nr_unk=100, nr_var=600, meta=None):
+    if meta is None:
+        nr_vector, ndim = f.readline().split(" ")
+    else:
+        nr_vector, ndim = meta.split(" ")
     nr_vector = int(nr_vector)
     ndim = int(ndim)
     vectors = np.zeros((nr_vector + nr_unk + nr_var + 2, ndim), dtype='float32')

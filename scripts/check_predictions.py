@@ -44,7 +44,7 @@ def validate(net, dev_loader):
     outputs = []
     ys = []
     for batch in dev_loader:
-        s, q, sl, ql, sv, qv, t = sort_batch(batch, pack=pack)
+        s, q, sl, ql, sv, qv, t = sort_batch(batch, pack=pack, sort_ind=3)
         s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         sl = Variable(sl, requires_grad=False)
