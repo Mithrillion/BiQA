@@ -23,17 +23,17 @@ dropout = 0.2
 learning_rate = 0.001
 story_rec_layers = 1
 resume = False
-pack = False
+pack = True
 emb_trainable = False
 lang = 'en'
-# use glove 6B
+# use original
 
 
 nlp = spacy.load(lang, vectors=False)
 # load new vectors
-# with open("../bilingual_vector/original/wiki.{0}.small.vec".format(lang), "r") as f:
-with open("../rc_data/processed/glove.6B/glove.6B.100d.txt".format(lang), "r") as f:
-    emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600, meta="400000 100")
+# with open("../rc_data/processed/glove.6B/glove.6B.100d.txt".format(lang), "r") as f:
+with open("../bilingual_vector/original/wiki.{0}.small.vec".format(lang), "r") as f:
+    emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600)
 print("embedding loaded!")
 
 train = pd.read_pickle("../input_data/train_{0}.pkl".format(lang))
@@ -49,7 +49,7 @@ def validate(net, dev_loader):
     outputs = []
     ys = []
     for batch in dev_loader:
-        s, q, sl, ql, sv, qv, t = sort_batch(batch, pack=pack)
+        s, q, sl, ql, sv, qv, t = sort_batch(batch, pack=pack, sort_ind=3)
         s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         sl = Variable(sl, requires_grad=False)
@@ -114,7 +114,7 @@ for epoch in range(init_epoch, n_epochs):
     cum_loss = 0
     for i, batch in enumerate(train_loader):
 
-        s, q, sl, ql, sv, qv, y = sort_batch(batch, pack=pack)
+        s, q, sl, ql, sv, qv, y = sort_batch(batch, pack=pack, sort_ind=3)
         s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         sl = Variable(sl, requires_grad=False)

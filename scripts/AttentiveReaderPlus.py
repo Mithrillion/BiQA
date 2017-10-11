@@ -107,28 +107,31 @@ class AttentiveReader(nn.Module):
 
         if self._pack:
             # pack sequences
-            s_emb = pack_padded_sequence(s_emb, story_len.data.numpy(), batch_first=True)
+            # s_emb = pack_padded_sequence(s_emb, story_len.data.numpy(), batch_first=True)
 
-            queries_len_ordered, queries_len_order = torch.sort(question_len, descending=True)
-            # ^^^ # get question lengths in sorted order, get order of question length
-            _, queries_inv_order = torch.sort(queries_len_order)
-            queries_len_order = queries_len_order.cuda()
-            queries_inv_order = queries_inv_order.cuda()
-            q_emb = q_emb.index_select(0, queries_len_order)  # sort embeddings in question length order
-            q_emb = pack_padded_sequence(q_emb, queries_len_ordered.data.numpy(), batch_first=True)
+            # queries_len_ordered, queries_len_order = torch.sort(question_len, descending=True)
+            # # ^^^ # get question lengths in sorted order, get order of question length
+            # _, queries_inv_order = torch.sort(queries_len_order)
+            # queries_len_order = queries_len_order.cuda()
+            # queries_inv_order = queries_inv_order.cuda()
+            # q_emb = q_emb.index_select(0, queries_len_order)  # sort embeddings in question length order
+            # q_emb = pack_padded_sequence(q_emb, queries_len_ordered.data.numpy(), batch_first=True)
+
+            q_emb = pack_padded_sequence(q_emb, question_len.data.numpy(), batch_first=True)
+            # ^^^ use this line of only batching questions
 
         y_out, _ = self._recurrent_layer(s_emb)  # batch * story_size * 2hidden_size
         _, q_hn = self._question_recurrent_layer(q_emb)  # _, batch * 2hidden_size
 
-        if self._pack:
-            y_out, _ = pad_packed_sequence(y_out, batch_first=True)
+        # if self._pack:
+        #     y_out, _ = pad_packed_sequence(y_out, batch_first=True)
 
         # left = y_out.contiguous()  #  seems to be no longer needed
 
         q_hn = q_hn.permute(1, 0, 2).contiguous().view((batch_size, self._hidden_size * 2, 1))
 
-        if self._pack:
-            q_hn = q_hn.index_select(0, queries_inv_order)  # batched rows -> reorder batches
+        # if self._pack:
+        #     q_hn = q_hn.index_select(0, queries_inv_order)  # batched rows -> reorder batches
 
         ms = y_out.bmm(self._mix_matrix.unsqueeze(0).expand(batch_size,
                                                             self._hidden_size * 2,
