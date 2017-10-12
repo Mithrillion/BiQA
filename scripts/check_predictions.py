@@ -22,7 +22,8 @@ var_size = 600
 dropout = 0.2
 learning_rate = 0.001
 story_rec_layers = 1
-resume = False
+projection_size = 100
+resume = True
 pack = False
 emb_trainable = False
 lang = 'en'
@@ -53,7 +54,7 @@ def validate(net, dev_loader):
         y = Variable(t.type(torch.LongTensor).cuda(async=True), requires_grad=False)
         out_logits = net.forward(x)
 
-        out_seq = predict_in_domain(batch[4], out_logits)
+        out_seq = predict_in_domain(sv, out_logits)
         val_loss = nn.CrossEntropyLoss()(out_logits, y)
         total_val_loss += val_loss.data.cpu().numpy()[0]
         outputs += [out_seq]
@@ -82,6 +83,7 @@ net = AttentiveReader(var_size, 2000, 50, emb_vectors,
                       hidden_size=hidden_size,
                       pack=pack,
                       emb_trainable=emb_trainable,
+                      projection_size=projection_size,
                       story_rec_layers=story_rec_layers)
 # net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), learning_rate)
 
@@ -91,7 +93,7 @@ print("network initialised!")
 if resume:
     print("loading saved states...")
     # resume test
-    saved_state = torch.load("./checkpoint.en.packed.pth.tar")
+    saved_state = torch.load("./model_best.en.packed.pth.tar")
     net.load_state_dict(saved_state['state_dict'])
 
 print("Validating results!")

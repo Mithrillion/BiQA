@@ -116,7 +116,7 @@ def save_checkpoint(state, is_best, filename='checkpoint.en.packed.pth.tar',
         shutil.copyfile(filename, best_name)
 
 
-def sort_batch(batch, sort_ind=2, pack=True):
+def sort_batch(batch, sort_ind=3, pack=True):
     if pack:
         _, orders = torch.sort(batch[sort_ind], dim=0, descending=True)
         return [x[orders] for x in batch]
