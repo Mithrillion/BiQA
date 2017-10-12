@@ -1,0 +1,17 @@
+{
+  "batch_size": 32,
+  "hidden_size": 128,
+  "n_epochs": 30,
+  "var_size": 600,
+  "dropout": 0.2,
+  "learning_rate": 0.01,
+  "story_rec_layers": 1,
+  "resume": false,
+  "pack": false,
+  "emb_trainable": false,
+  "lang": "en",
+  "momentum": 0.8,
+  "selected_embedding": "original",
+  "optimiser": "sgd/momentum",
+  "seed": 7777
+}
