@@ -22,7 +22,7 @@ var_size = 600
 dropout = 0.2
 learning_rate = 0.001
 story_rec_layers = 1
-projection_size = 100
+# projection_size = 100
 resume = True
 pack = False
 emb_trainable = False
@@ -83,7 +83,6 @@ net = AttentiveReader(var_size, 2000, 50, emb_vectors,
                       hidden_size=hidden_size,
                       pack=pack,
                       emb_trainable=emb_trainable,
-                      projection_size=projection_size,
                       story_rec_layers=story_rec_layers)
 # net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), learning_rate)
 

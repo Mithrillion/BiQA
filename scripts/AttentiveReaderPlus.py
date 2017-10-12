@@ -18,7 +18,6 @@ class AttentiveReader(nn.Module):
                  gru_init_std=0.1,
                  init_range=0.01,
                  story_rec_layers=1,
-                 projection_size=100,
                  opt=None):
         super(AttentiveReader, self).__init__()
 
@@ -36,7 +35,6 @@ class AttentiveReader(nn.Module):
         self._nr_unk = nr_unk
         self._emb_trainable = emb_trainable
         self._story_rec_layers = story_rec_layers
-        self._projection_size = projection_size
         self.optimiser = opt
 
         # create layers
@@ -44,14 +42,14 @@ class AttentiveReader(nn.Module):
         # variable embeddings
         self._embedding_layer = nn.Embedding(emb_vectors.shape[0], emb_vectors.shape[1], 0)
 
-        self._embedding_projection_layer = nn.Linear(emb_vectors.shape[1], projection_size, bias=False)
-        # projection_size = emb_vectors.shape[1]
+        # self._embedding_projection_layer = nn.Linear(emb_vectors.shape[1], projection_size, bias=False)
+        projection_size = emb_vectors.shape[1]
 
         self._dropout = nn.Dropout(dropout)
-        self._recurrent_layer = nn.GRU(projection_size, hidden_size, story_rec_layers,
+        self._recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, story_rec_layers,
                                        batch_first=True,
                                        bidirectional=True)
-        self._question_recurrent_layer = nn.GRU(projection_size, hidden_size, 1,
+        self._question_recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, 1,
                                                 batch_first=True,
                                                 bidirectional=True)
 
@@ -89,7 +87,7 @@ class AttentiveReader(nn.Module):
             else:
                 init.orthogonal(p.data, gain)
 
-        self._embedding_projection_layer.weight.data.uniform_(-init_range, init_range)
+        # self._embedding_projection_layer.weight.data.uniform_(-init_range, init_range)
         self._output_layer.weight.data.uniform_(-init_range, init_range)
         self._output_layer.bias.data.fill_(0)
 
@@ -99,11 +97,11 @@ class AttentiveReader(nn.Module):
         story, question, story_len, question_len = batch
         batch_size = story.size()[0]
 
-        s_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(story)))
-        # s_emb = self._dropout(self._embedding_layer(story))
+        # s_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(story)))
+        s_emb = self._dropout(self._embedding_layer(story))
 
-        q_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(question)))
-        # q_emb = self._dropout(self._embedding_layer(question))
+        # q_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(question)))
+        q_emb = self._dropout(self._embedding_layer(question))
 
         if self._pack:
             # pack sequences

@@ -20,17 +20,17 @@ hidden_size = 128
 n_epochs = 30
 var_size = 600
 dropout = 0.2
-learning_rate = 0.1
+learning_rate = 0.01
 story_rec_layers = 1
 resume = False
 pack = False
 emb_trainable = False
 lang = 'en'
-projection_size = 100
+momentum = 0.9
 # use original
 # pack question only
 # map embeddings
-# use SGD
+# use SGD w/ momentum
 
 
 nlp = spacy.load(lang, vectors=False)
@@ -91,10 +91,10 @@ net = AttentiveReader(var_size, 2000, 50, emb_vectors,
                       hidden_size=hidden_size,
                       pack=pack,
                       emb_trainable=emb_trainable,
-                      projection_size=projection_size,
                       story_rec_layers=story_rec_layers)
 # net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), learning_rate)
-net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=learning_rate)
+net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=learning_rate,
+                          momentum=momentum)
 
 net.cuda()
 print("network initialised!")
