@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
     print("testing multi-step training!")
     for epoch in range(init_epoch, params['n_epochs']):
-        print("epoch no.{0}".format(epoch + 1))
+        print("epoch no.{0} start!".format(epoch + 1))
 
         i = 0
         cum_loss = 0
@@ -143,6 +143,7 @@ if __name__ == '__main__':
             if i % 1000 == 1 or i == len(train_loader) - 1:
                 net.eval()
                 val_loss, acc = validate(net, dev_loader)
+                print("epoch no.{0}".format(epoch + 1))
                 print("validation loss = {0:.10}, validation accuracy = {1:.5}".
                       format(val_loss, acc))
                 checkpoint_val_loss = val_loss
