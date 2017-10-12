@@ -7,7 +7,7 @@
   "learning_rate": 0.01,
   "story_rec_layers": 1,
   "resume": false,
-  "pack": false,
+  "pack": true,
   "emb_trainable": false,
   "lang": "en",
   "momentum": 0.8,

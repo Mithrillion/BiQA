@@ -97,6 +97,10 @@ if __name__ == '__main__':
                                   momentum=0)
     elif params['optimiser'] == 'adam':
         net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), params['learning_rate'])
+    elif params['optimiser'] == 'adadelta':
+        net.optimiser = optim.Adadelta(filter(lambda p: p.requires_grad, net.parameters()), params['learning_rate'])
+    else:
+        raise NotImplementedError("Invalid optimiser!")
 
     net.cuda()
     print("network initialised!")
