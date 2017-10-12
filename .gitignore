@@ -111,6 +111,7 @@ wordvecs/
 vecmap/
 bilingual_vector/*/
 alignment/
+results/
 
 # idea ide files
 .idea/
