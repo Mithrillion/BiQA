@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # with open("../rc_data/processed/glove.6B/glove.6B.100d.txt".format(lang), "r") as f:
     with open("../bilingual_vector/{1}/wiki.{0}.small.vec".format(params['lang'],
                                                                   params['selected_embedding']), "r") as f:
-        emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600)
+        emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600, meta=params['embedding_meta'])
     print("embedding loaded!")
 
     train = pd.read_pickle("../input_data/train_{0}.pkl".format(params['lang']))
@@ -96,7 +96,7 @@ if __name__ == '__main__':
         net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'],
                                   momentum=0)
     elif params['optimiser'] == 'adam':
-        net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), params['learning_rate'])
+        net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'])
     elif params['optimiser'] == 'adadelta':
         net.optimiser = optim.Adadelta(filter(lambda p: p.requires_grad, net.parameters()), params['learning_rate'])
     else:

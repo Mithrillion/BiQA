@@ -135,6 +135,10 @@ class AttentiveReader(nn.Module):
                                                             self._hidden_size * 2,
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
+
+        M = 1e2
+        ms -= (story == 0).float().unsqueeze(2) * M  # penalise padding tokens so they are not attended to
+
         ss = F.softmax(ms)
 
         r = torch.sum(y_out * ss.expand_as(y_out), dim=1, keepdim=True)  # batch * 2hidden_size
