@@ -5,12 +5,16 @@ import torch
 import shutil
 
 
-def get_word_ids(doc, rnn_encode=True, max_length=100, nr_unk=100, nr_var=600, rev_dic=None):
+def get_word_ids(doc, rnn_encode=True, max_length=100,
+                 nr_unk=100, nr_var=600, rev_dic=None, relabel=True, ent_dict=None):
     queue = list(doc)
     X = np.zeros(max_length, dtype='int32')
     # M = np.zeros(max_length, dtype='int32')
     V = np.zeros(max_length, dtype='int32')
     words = []
+    if ent_dict is None:
+        ent_dict = {}
+    k = 0
     while len(words) <= max_length and queue:
         word = queue.pop(0)
         if rnn_encode or (not word.is_punct and not word.is_space):
@@ -25,8 +29,15 @@ def get_word_ids(doc, rnn_encode=True, max_length=100, nr_unk=100, nr_var=600, r
             # TODO: properly fix entity replacement
             num = int(re.search(r'\d+', token.text[7:]).group(0))
             if 0 <= num < nr_var:
-                X[j] = num + 2
-                V[j] = num + 2
+                if relabel:
+                    if num not in ent_dict.keys():
+                        ent_dict[num] = k
+                        k += 1
+                    X[j] = ent_dict[num] + 2
+                    V[j] = ent_dict[num] + 2
+                else:
+                    X[j] = num + 2
+                    V[j] = num + 2
         elif token.text in rev_dic.keys():
             X[j] = rev_dic[token.text] + nr_unk + nr_var + 2
             # M[j] = 1
@@ -35,14 +46,15 @@ def get_word_ids(doc, rnn_encode=True, max_length=100, nr_unk=100, nr_var=600, r
             X[j] = (token.shape % nr_unk) + 2 + nr_var
         if j >= max_length - 1:
             break
-    return X, V
+    return X, V, ent_dict
 
 
 class QADataset(tud.Dataset):
-    def __init__(self, data_df, nlp, rev_dic):
+    def __init__(self, data_df, nlp, rev_dic, relabel=True):
         self.data_df = data_df
         self.nlp = nlp
         self.rev_dic = rev_dic
+        self.relabel = relabel
 
     def __len__(self):
         return self.data_df.shape[0]
@@ -50,14 +62,18 @@ class QADataset(tud.Dataset):
     def __getitem__(self, i):
 
         story = self.nlp(self.data_df['story'].iloc[i].lower(), parse=False, tag=False, entity=False)
-        s, s_var = get_word_ids(story, max_length=2000, rev_dic=self.rev_dic)
+        s, s_var, ent_dict = get_word_ids(story, max_length=2000, rev_dic=self.rev_dic, relabel=self.relabel)
         s_len = np.sum(s != 0)
 
         question = self.nlp(self.data_df['question'].iloc[i].lower(), parse=False, tag=False, entity=False)
-        q, q_var = get_word_ids(question, max_length=50, rev_dic=self.rev_dic)
+        q, q_var, ent_dict = get_word_ids(question, max_length=50, rev_dic=self.rev_dic, relabel=self.relabel,
+                                          ent_dict=ent_dict)
         q_len = np.sum(q != 0)
 
-        answer = int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))
+        if self.relabel:
+            answer = ent_dict[int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))]
+        else:
+            answer = int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))
 
         return s, q, s_len, q_len, s_var, q_var, answer
 

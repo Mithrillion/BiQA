@@ -136,7 +136,7 @@ class AttentiveReader(nn.Module):
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
 
-        M = 1e2
+        M = 1e5
         ms -= (story == 0).float().unsqueeze(2) * M  # penalise padding tokens so they are not attended to
 
         ss = F.softmax(ms)
@@ -165,17 +165,3 @@ class AttentiveReader(nn.Module):
     def _reset_nil_gradients(self):
         if self._emb_trainable:
             self._embedding_layer.weight.data[0, :] = 0
-
-    @staticmethod
-    def softmax(inputs, axis=1):
-        input_size = inputs.size()
-
-        trans_input = inputs.transpose(axis, len(input_size) - 1)
-        trans_size = trans_input.size()
-
-        input_2d = trans_input.contiguous().view(-1, trans_size[-1])
-
-        soft_max_2d = F.softmax(input_2d)
-
-        soft_max_nd = soft_max_2d.view(*trans_size)
-        return soft_max_nd.transpose(axis, len(input_size) - 1)

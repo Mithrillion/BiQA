@@ -10,7 +10,7 @@ with open("../bilingual_vector/original/wiki.{0}.small.vec".format(lang), "r") a
     emb, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600)
 print("embedding loaded!")
 train = pd.read_pickle("../input_data/train_{0}.pkl".format(lang))
-ds = QADataset(train, nlp, rev_dic)
+ds = QADataset(train, nlp, rev_dic, True)
 print(ds.__len__())
 s, q, sl, ql, sv, qv, a = ds.__getitem__(1)
 print(s.shape)

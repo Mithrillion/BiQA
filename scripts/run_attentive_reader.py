@@ -77,9 +77,11 @@ if __name__ == '__main__':
 
     train = pd.read_pickle("../input_data/train_{0}.pkl".format(params['lang']))
     dev = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang']))
-    train_loader = tud.DataLoader(QADataset(train, nlp, rev_dic), batch_size=params['batch_size'], pin_memory=True,
+    train_loader = tud.DataLoader(QADataset(train, nlp, rev_dic, relabel=params['relabel']),
+                                  batch_size=params['batch_size'], pin_memory=True,
                                   num_workers=3, shuffle=True)
-    dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic), batch_size=params['batch_size'],
+    dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic, relabel=params['relabel']),
+                                batch_size=params['batch_size'],
                                 pin_memory=True, num_workers=3)
 
     net = AttentiveReader(params['var_size'], 2000, 50, emb_vectors,
