@@ -136,8 +136,8 @@ class AttentiveReader(nn.Module):
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
 
-        M = 1e5
-        ms -= (story == 0).float().unsqueeze(2) * M  # penalise padding tokens so they are not attended to
+        # M = 1e3
+        # ms -= (story == 0).float().unsqueeze(2) * M  # penalise padding tokens so they are not attended to
 
         ss = F.softmax(ms)
 

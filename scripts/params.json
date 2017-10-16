@@ -4,7 +4,7 @@
   "n_epochs": 30,
   "var_size": 600,
   "dropout": 0.2,
-  "learning_rate": 0.1,
+  "learning_rate": 0.01,
   "story_rec_layers": 1,
   "resume": false,
   "pack": true,
@@ -13,7 +13,7 @@
   "momentum": 0.8,
   "selected_embedding": "original",
   "embedding_meta": null,
-  "optimiser": "sgd",
+  "optimiser": "sgd/momentum",
   "relabel": true,
   "seed": 7777
 }
