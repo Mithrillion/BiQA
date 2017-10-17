@@ -14,7 +14,7 @@ class AttentiveReader(nn.Module):
                  max_grad_norm=10,
                  nr_unk=100,
                  pack=True,
-                 emb_trainable=True,
+                 emb_trainable=False,
                  gru_init_std=0.1,
                  init_range=0.01,
                  story_rec_layers=1,
@@ -29,7 +29,7 @@ class AttentiveReader(nn.Module):
         self._question_size = question_max_len
         self._hidden_size = hidden_size
         self._dropout_rate = dropout
-        self._emb_vector = emb_vectors
+        self._l1_emb_vector, self._l2_emb_vector = emb_vectors
         self._max_grad_norm = max_grad_norm
         self._pack = pack
         self._nr_unk = nr_unk
@@ -40,13 +40,15 @@ class AttentiveReader(nn.Module):
         # create layers
 
         # variable embeddings
-        self._embedding_layer = nn.Embedding(emb_vectors.shape[0], emb_vectors.shape[1], 0)
+        assert(self._l1_emb_vector.shape[1] == self._l2_emb_vector)
+        self._l1_embedding_layer = nn.Embedding(self._l1_emb_vector.shape[0], self._l1_emb_vector.shape[1], 0)
+        self._l2_embedding_layer = nn.Embedding(self._l2_emb_vector.shape[0], self._l2_emb_vector.shape[1], 0)
 
         self._dropout = nn.Dropout(dropout)
-        self._recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, story_rec_layers,
+        self._recurrent_layer = nn.GRU(self._l1_emb_vector.shape[1], hidden_size, story_rec_layers,
                                        batch_first=True,
                                        bidirectional=True)
-        self._question_recurrent_layer = nn.GRU(emb_vectors.shape[1], hidden_size, 1,
+        self._question_recurrent_layer = nn.GRU(self._l1_emb_vector.shape[1], hidden_size, 1,
                                                 batch_first=True,
                                                 bidirectional=True)
 
@@ -59,15 +61,28 @@ class AttentiveReader(nn.Module):
         init_range = self._init_range
         init_std = self._gru_init_std
 
-        self._embedding_layer.weight.data.copy_(torch.from_numpy(self._emb_vector))
-        unk_n_var = self._embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :]
-        init.normal(unk_n_var, 0, 1)
-        unk_n_var /= torch.norm(unk_n_var, p=2, dim=1).unsqueeze(1)  # normalise randomly initialised embeddings
-        # ^^^ init unk * 100 embeddings
-        self._embedding_layer.weight.data[0, :] = 0
+        self._l1_embedding_layer.weight.data.copy_(torch.from_numpy(self._l1_emb_vector))
+        self._l2_embedding_layer.weight.data.copy_(torch.from_numpy(self._l2_emb_vector))
+
+        unk_n_var_1 = self._l1_embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :]
+        init.normal(unk_n_var_1, 0, 1)
+        unk_n_var_1 /= torch.norm(unk_n_var_1, p=2, dim=1).unsqueeze(1)  # normalise randomly initialised embeddings
+        self._l1_embedding_layer.weight.data[0, :] = 0
         if not self._emb_trainable:
-            self._embedding_layer.weight.requires_gard = False
-        # ^^^ size = entities + ph + non-ent-marker
+            self._l1_embedding_layer.weight.requires_gard = False  # size = entities + ph + non-ent-marker
+
+        unk_2 = self._l2_embedding_layer.weight.data[2: 2 + self._nr_unk, :]
+        init.normal(unk_2, 0, 1)
+        unk_2 /= torch.norm(unk_2, p=2, dim=1).unsqueeze(1)  # normalise randomly initialised embeddings
+        # ^^^ init unk * 100 embeddings
+        self._l2_embedding_layer.weight.data[1, :] = self._l1_embedding_layer.weight.data[1, :]
+        # ^^^ share @placeholder embedding
+        self._l2_embedding_layer.weight.data[2 + self._nr_unk: 2 + self._nr_unk + self._var_size, :] = \
+            self._l1_embedding_layer.weight.data[2 + self._nr_unk: 2 + self._nr_unk + self._var_size, :]
+        # ^^^ share @entityX embeddings
+        self._l2_embedding_layer.weight.data[0, :] = 0
+        if not self._emb_trainable:
+            self._l2_embedding_layer.weight.requires_gard = False  # size = entities + ph + non-ent-marker
         # DONE: initialise non-zero locations
         # TODO: randomise in forward step?
 
@@ -90,6 +105,7 @@ class AttentiveReader(nn.Module):
         self._mix_matrix.data.uniform_(-init_range, init_range)
 
     def forward(self, batch):
+        # TODO: two passthroughs for two languages
         story, question, story_len, question_len = batch
         batch_size = story.size()[0]
 

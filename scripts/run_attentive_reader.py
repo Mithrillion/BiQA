@@ -57,6 +57,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--params', type=str, default='.', help='Parameters file directory')
+    parser.add_argument('-v', '--validate', action='store_true')
     arg = parser.parse_args()
     params_file = path.join(arg.params, "params.json")
     params = json.load(open(params_file, "rb"))
@@ -74,15 +75,6 @@ if __name__ == '__main__':
                                                                   params['selected_embedding']), "r") as f:
         emb_vectors, dic, rev_dic = get_embeddings(f, nr_unk=100, nr_var=600, meta=params['embedding_meta'])
     print("embedding loaded!")
-
-    train = pd.read_pickle("../input_data/train_{0}.pkl".format(params['lang']))
-    dev = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang']))
-    train_loader = tud.DataLoader(QADataset(train, nlp, rev_dic, relabel=params['relabel']),
-                                  batch_size=params['batch_size'], pin_memory=True,
-                                  num_workers=3, shuffle=True)
-    dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic, relabel=params['relabel']),
-                                batch_size=params['batch_size'],
-                                pin_memory=True, num_workers=3)
 
     net = AttentiveReader(params['var_size'], 2000, 50, emb_vectors,
                           dropout=params['dropout'],
@@ -107,63 +99,95 @@ if __name__ == '__main__':
     net.cuda()
     print("network initialised!")
 
-    best_loss = np.inf
-    init_epoch = 0
-    if params['resume']:
+    if arg.validate:
+        print("validating...")
         print("loading saved states...")
-        # resume test
-        saved_state = torch.load(checkpoint_file)
         best_state = torch.load(best_file)
-        net.load_state_dict(saved_state['state_dict'])
-        init_epoch = saved_state['epoch']
-        best_loss = best_state['epoch_val_loss']
+        net.load_state_dict(best_state['state_dict'])
         del best_state
+        print("loading validation data...")
+        dev = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang']))
+        dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic, relabel=params['relabel']),
+                                    batch_size=params['batch_size'],
+                                    pin_memory=True, num_workers=3)
+        test = pd.read_pickle("../input_data/test_{0}.pkl".format(params['lang']))
+        test_loader = tud.DataLoader(QADataset(test, nlp, rev_dic, relabel=params['relabel']),
+                                     batch_size=params['batch_size'],
+                                     pin_memory=True, num_workers=3)
+        net.eval()
+        loss_score, acc_score = validate(net, dev_loader)
+        print("validation loss = {0:.10}, validation accuracy = {1:.5}".
+              format(loss_score, acc_score))
+        loss_score, acc_score = validate(net, test_loader)
+        print("test loss = {0:.10}, test accuracy = {1:.5}".
+              format(loss_score, acc_score))
+    else:
+        train = pd.read_pickle("../input_data/train_{0}.pkl".format(params['lang']))
+        dev = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang']))
+        train_loader = tud.DataLoader(QADataset(train, nlp, rev_dic, relabel=params['relabel']),
+                                      batch_size=params['batch_size'], pin_memory=True,
+                                      num_workers=3, shuffle=True)
+        dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic, relabel=params['relabel']),
+                                    batch_size=params['batch_size'],
+                                    pin_memory=True, num_workers=3)
 
-    print("testing multi-step training!")
-    for epoch in range(init_epoch, params['n_epochs']):
-        print("epoch no.{0} start!".format(epoch + 1))
+        best_loss = np.inf
+        init_epoch = 0
+        if params['resume']:
+            print("loading saved states...")
+            # resume test
+            saved_state = torch.load(checkpoint_file)
+            best_state = torch.load(best_file)
+            net.load_state_dict(saved_state['state_dict'])
+            init_epoch = saved_state['epoch']
+            best_loss = best_state['epoch_val_loss']
+            del best_state
 
-        i = 0
-        cum_loss = 0
-        for i, batch in enumerate(train_loader):
+        print("testing multi-step training!")
+        for epoch in range(init_epoch, params['n_epochs']):
+            print("epoch no.{0} start!".format(epoch + 1))
 
-            s, q, sl, ql, sv, qv, y = sort_batch(batch, pack=params['pack'], sort_ind=3)
-            s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
-            q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
-            sl = Variable(sl, requires_grad=False)
-            ql = Variable(ql, requires_grad=False)
-            y = Variable(y.type(torch.LongTensor).cuda(async=True), requires_grad=False)
-            xy = (s, q, sl, ql, y)
+            i = 0
+            cum_loss = 0
+            for i, batch in enumerate(train_loader):
 
-            net.train()
-            loss, out = net.train_on_batch(xy)
-            cum_loss += loss.cpu().numpy()[0]
+                s, q, sl, ql, sv, qv, y = sort_batch(batch, pack=params['pack'], sort_ind=3)
+                s = Variable(s.type(torch.LongTensor).cuda(async=True), requires_grad=False)
+                q = Variable(q.type(torch.LongTensor).cuda(async=True), requires_grad=False)
+                sl = Variable(sl, requires_grad=False)
+                ql = Variable(ql, requires_grad=False)
+                y = Variable(y.type(torch.LongTensor).cuda(async=True), requires_grad=False)
+                xy = (s, q, sl, ql, y)
 
-            if i % 100 == 1:
-                net.eval()
-                if i == 1:
-                    cum_loss *= 50
-                print("iteration {0}/{1}\ntraining loss =   {2:.10}".
-                      format(i, len(train_loader), cum_loss / 100.))
-                cum_loss = 0
-            if i % 1000 == 1 or i == len(train_loader) - 1:
-                net.eval()
-                val_loss, acc = validate(net, dev_loader)
-                print("epoch no.{0}".format(epoch + 1))
-                print("validation loss = {0:.10}, validation accuracy = {1:.5}".
-                      format(val_loss, acc))
-                checkpoint_val_loss = val_loss
-                is_best = checkpoint_val_loss < best_loss
-                if is_best:
-                    best_loss = checkpoint_val_loss
-                # print("checkpoint loss = {0:.10}".format(checkpoint_val_loss))
-                save_checkpoint(
-                    {
-                        'epoch': epoch,
-                        'batch': i,
-                        'state_dict': net.state_dict(),
-                        'epoch_val_loss': checkpoint_val_loss
-                    },
-                    is_best,
-                    filename=checkpoint_file,
-                    best_name=best_file)
+                net.train()
+                loss, out = net.train_on_batch(xy)
+                cum_loss += loss.cpu().numpy()[0]
+
+                if i % 100 == 1:
+                    net.eval()
+                    if i == 1:
+                        cum_loss *= 50
+                    print("iteration {0}/{1}\ntraining loss =   {2:.10}".
+                          format(i, len(train_loader), cum_loss / 100.))
+                    cum_loss = 0
+                if i % 1000 == 1 or i == len(train_loader) - 1:
+                    net.eval()
+                    val_loss, acc = validate(net, dev_loader)
+                    print("epoch no.{0}".format(epoch + 1))
+                    print("validation loss = {0:.10}, validation accuracy = {1:.5}".
+                          format(val_loss, acc))
+                    checkpoint_val_loss = val_loss
+                    is_best = checkpoint_val_loss < best_loss
+                    if is_best:
+                        best_loss = checkpoint_val_loss
+                    # print("checkpoint loss = {0:.10}".format(checkpoint_val_loss))
+                    save_checkpoint(
+                        {
+                            'epoch': epoch,
+                            'batch': i,
+                            'state_dict': net.state_dict(),
+                            'epoch_val_loss': checkpoint_val_loss
+                        },
+                        is_best,
+                        filename=checkpoint_file,
+                        best_name=best_file)

@@ -27,17 +27,20 @@ def get_word_ids(doc, rnn_encode=True, max_length=100,
         elif token.text[:7] == '@entity':
             # temporary dix
             # TODO: properly fix entity replacement
-            num = int(re.search(r'\d+', token.text[7:]).group(0))
-            if 0 <= num < nr_var:
-                if relabel:
-                    if num not in ent_dict.keys():
-                        ent_dict[num] = k
-                        k += 1
-                    X[j] = ent_dict[num] + 2
-                    V[j] = ent_dict[num] + 2
-                else:
-                    X[j] = num + 2
-                    V[j] = num + 2
+            try:
+                num = int(re.search(r'\d+', token.text[7:]).group(0))
+                if 0 <= num < nr_var:
+                    if relabel:
+                        if num not in ent_dict.keys():
+                            ent_dict[num] = k
+                            k += 1
+                        X[j] = ent_dict[num] + 2
+                        V[j] = ent_dict[num] + 2
+                    else:
+                        X[j] = num + 2
+                        V[j] = num + 2
+            except AttributeError:
+                X[j] = (token.shape % nr_unk) + 2 + nr_var
         elif token.text in rev_dic.keys():
             X[j] = rev_dic[token.text] + nr_unk + nr_var + 2
             # M[j] = 1
@@ -71,7 +74,11 @@ class QADataset(tud.Dataset):
         q_len = np.sum(q != 0)
 
         if self.relabel:
-            answer = ent_dict[int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))]
+            try:
+                answer = ent_dict[int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))]
+            except KeyError:
+                print(self.data_df['story'].iloc[i].lower())
+                print(self.data_df['answer'].iloc[i])
         else:
             answer = int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))
 
