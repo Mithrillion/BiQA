@@ -74,11 +74,7 @@ class QADataset(tud.Dataset):
         q_len = np.sum(q != 0)
 
         if self.relabel:
-            try:
-                answer = ent_dict[int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))]
-            except KeyError:
-                print(self.data_df['story'].iloc[i].lower())
-                print(self.data_df['answer'].iloc[i])
+            answer = ent_dict[int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))]
         else:
             answer = int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))
 

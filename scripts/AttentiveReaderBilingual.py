@@ -155,3 +155,22 @@ class AttentiveReader(nn.Module):
     def _reset_nil_gradients(self):
         if self._emb_trainable:
             self._embedding_layer.weight.data[0, :] = 0
+
+    def get_weights(self):
+        return (self._l1_embedding_layer.weight.data, self._l2_embedding_layer.weight.data,
+                self._recurrent_layer.parameters(), self._question_recurrent_layer.parameters(),
+                self._output_layer.parameters(), self._mix_matrix.data)
+
+    def set_weights_except_embeddings(self, weights):
+        ew1, ew2, rws, qws, ows, mw = weights
+        for w, t in zip(self._recurrent_layer.parameters(), rws):
+            w.data.copy_(t.data)
+        for w, t in zip(self._question_recurrent_layer.parameters(), qws):
+            w.data.copy_(t.data)
+        for w, t in zip(self._output_layer.parameters(), ows):
+            w.data.copy_(t.data)
+        self._mix_matrix.data.copy_(mw)
+        self._l1_embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :] = \
+            ew1[1: 2 + self._nr_unk + self._var_size, :]
+        self._l2_embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :] = \
+            ew2[1: 2 + self._nr_unk + self._var_size, :]
