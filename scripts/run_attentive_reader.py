@@ -56,10 +56,9 @@ def predict_in_domain(story_vars, out_logits):
 def define_network(params, cross=None, requires_optim=True):
     if cross:
         lang = cross
-        selected_embedding = 'mapped'
     else:
         lang = params['lang']
-        selected_embedding = params['selected_embedding']
+    selected_embedding = params['selected_embedding']
     # load new vectors
     # with open("../rc_data/processed/glove.6B/glove.6B.100d.txt".format(lang), "r") as f:
     with open("../bilingual_vector/{1}/wiki.{0}.small.vec".format(lang,
@@ -100,6 +99,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--validate', action='store_true')
     parser.add_argument('-c', '--cross', type=str, help="target language for cross-lingual evaluation")
     parser.add_argument('-t', '--crosstrain', type=str, help="target language for cross-lingual training")
+    # parser.add_argument('-f', '--forceoriginal', action='store_true')
     arg = parser.parse_args()
     params_file = path.join(arg.params, "params.json")
     params = json.load(open(params_file, "rb"))
@@ -110,7 +110,7 @@ if __name__ == '__main__':
     np.random.seed(params['seed'])
     torch.manual_seed(params['seed'])
 
-    if arg.validate:
+    if arg.validate and arg.cross is None:
         print("validating...")
         print("building network...")
         nlp = spacy.load(params['lang'], vectors=False)
@@ -141,14 +141,24 @@ if __name__ == '__main__':
         print("validating cross-lingual performance...")
         print("building network...")
         nlp = spacy.load(arg.cross, vectors=False)
-        # dummy network
-        dnet, _, _ = define_network(params, requires_optim=False)
-        best_state = torch.load(best_file)
-        dnet.load_state_dict(best_state['state_dict'])
-        # real network
-        net, dic, rev_dic = define_network(params, cross=arg.cross, requires_optim=False)
-        net.set_weights_except_embeddings(dnet.get_weights())
-        del dnet
+        if arg.validate:
+            # point to new checkpoint files
+            checkpoint_file = path.join(arg.params, "cross_checkpoint.{0}.pth.tar".format(arg.cross))
+            best_file = path.join(arg.params, "cross_model_best.{0}.pth.tar".format(arg.cross))
+            net, dic, rev_dic = define_network(params, cross=arg.cross, requires_optim=False)
+            print("loading saved states...")
+            best_state = torch.load(best_file)
+            net.load_state_dict(best_state['state_dict'])
+            del best_state
+        else:
+            # dummy network
+            dnet, _, _ = define_network(params, requires_optim=False)
+            best_state = torch.load(best_file)
+            dnet.load_state_dict(best_state['state_dict'])
+            # real network
+            net, dic, rev_dic = define_network(params, cross=arg.cross, requires_optim=False)
+            net.set_weights_except_embeddings(dnet.get_weights())
+            del dnet, best_state
 
         dev = pd.read_pickle("../input_data/dev_{0}.pkl".format(arg.cross))
         dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic, relabel=params['relabel']),
@@ -178,7 +188,7 @@ if __name__ == '__main__':
         # real network
         net, dic, rev_dic = define_network(params, cross=arg.crosstrain, requires_optim=True)
         net.set_weights_except_embeddings(dnet.get_weights())
-        del dnet
+        del dnet, best_state
 
         dev = pd.read_pickle("../input_data/dev_{0}.pkl".format(arg.crosstrain))
         dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic, relabel=params['relabel']),
@@ -192,8 +202,8 @@ if __name__ == '__main__':
         best_loss = np.inf
         init_epoch = 0
         # point to new checkpoint files
-        checkpoint_file = path.join(arg.params, "cross_checkpoint.{0}.pth.tar".format(params['lang']))
-        best_file = path.join(arg.params, "cross_model_best.{0}.pth.tar".format(params['lang']))
+        checkpoint_file = path.join(arg.params, "cross_checkpoint.{0}.pth.tar".format(arg.crosstrain))
+        best_file = path.join(arg.params, "cross_model_best.{0}.pth.tar".format(arg.crosstrain))
         # TODO: allow cross-training to be resumed
         # if params['resume']:
         #     print("loading saved states...")

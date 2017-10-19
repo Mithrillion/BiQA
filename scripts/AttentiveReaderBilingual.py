@@ -2,8 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Function
 from torch.nn import init
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+from torch.nn.utils.rnn import pack_padded_sequence
 
 
 class AttentiveReader(nn.Module):
@@ -18,7 +19,11 @@ class AttentiveReader(nn.Module):
                  gru_init_std=0.1,
                  init_range=0.01,
                  story_rec_layers=1,
-                 opt=None):
+                 adversarial=True,
+                 discriminator_hidden_size=128,
+                 discriminator_weight=0.5,
+                 opt=None,
+                 adv_opt=None):
         super(AttentiveReader, self).__init__()
 
         # setting attributes
@@ -35,7 +40,11 @@ class AttentiveReader(nn.Module):
         self._nr_unk = nr_unk
         self._emb_trainable = emb_trainable
         self._story_rec_layers = story_rec_layers
+        self._adversarial = adversarial
+        self._discriminator_hidden_size = discriminator_hidden_size
+        self._discriminator_weight = discriminator_weight
         self.optimiser = opt
+        self.adv_optimiser = adv_opt
 
         # create layers
 
@@ -54,6 +63,13 @@ class AttentiveReader(nn.Module):
 
         self._output_layer = nn.Linear(hidden_size * 2, var_size)
         self._mix_matrix = nn.Parameter(torch.zeros((hidden_size * 2, hidden_size * 2)))
+
+        if adversarial:
+            self._discriminator = nn.Sequential(nn.Linear(hidden_size * 2, discriminator_hidden_size),
+                                                nn.ReLU(),
+                                                nn.Dropout(0.5),
+                                                nn.Linear(discriminator_hidden_size, 1)
+                                                )
 
         self.init_weights()
 
@@ -105,17 +121,18 @@ class AttentiveReader(nn.Module):
         self._mix_matrix.data.uniform_(-init_range, init_range)
 
     def forward(self, batch):
-        # TODO: two passthroughs for two languages
-        story, question, story_len, question_len = batch
+        lang, story, question, story_len, question_len = batch
         batch_size = story.size()[0]
 
         # s_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(story)))
-        s_emb = self._dropout(self._embedding_layer(story))
+        s_emb = self._dropout(self._l1_embedding_layer(story) * lang + self._l2_embedding_layer(story) * (1 - lang))
 
         # q_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(question)))
-        q_emb = self._dropout(self._embedding_layer(question))
+        q_emb = self._dropout(self._l1_embedding_layer(question) * lang
+                              + self._l2_embedding_layer(question) * (1 - lang))
 
         if self._pack:
+            # TODO: still have to sort questions by length after mixing two languages
             q_emb = pack_padded_sequence(q_emb, question_len.data.numpy(), batch_first=True)
             # ^^^ use this line of only batching questions
 
@@ -132,24 +149,42 @@ class AttentiveReader(nn.Module):
         ss = F.softmax(ms)
 
         r = torch.sum(y_out * ss.expand_as(y_out), dim=1, keepdim=True)  # batch * 2hidden_size
+
         out = self._output_layer(r.squeeze())
-        return out
+        # TODO: try different locations to insert adversarial network
+        if self._adversarial:
+            discriminator_out = self._discriminator(ms)
+            return out, discriminator_out
+        else:
+            return out, None
 
     def train_on_batch(self, batch):
         """call net.train() before calling this method!"""
-        out = self.forward(batch[:-1])
+        out, discriminator_out = self.forward(batch[:-1])
         answers = batch[-1]
-        loss = nn.CrossEntropyLoss()(out, answers)
+        # TODO: use adversarial loss if enabled
+        if self._adversarial:
+            lang = batch[0]
+            # TODO: maximin
+            loss = nn.CrossEntropyLoss()(out, answers)\
+                - self._discriminator_weight * nn.BCEWithLogitsLoss()(discriminator_out, lang)
+            pass
+        else:
+            loss = nn.CrossEntropyLoss()(out, answers)
         self.zero_grad()
         loss.backward()
         self._reset_nil_gradients()
         torch.nn.utils.clip_grad_norm(self.parameters(), self._max_grad_norm)
+        if self._adversarial:
+            # negate the gradient of the discriminator so we minimise the discriminator loss wrt discriminator weights
+            for p in self._discriminator.parameters():
+                p._grad = -p._grad
         self.optimiser.step()
         return loss.data, F.softmax(out)
 
     def predict(self, batch):
         """call net.eval() before calling this method!"""
-        out = self.forward(batch)
+        out, _ = self.forward(batch)
         return F.softmax(out)
 
     def _reset_nil_gradients(self):
