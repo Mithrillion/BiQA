@@ -3,6 +3,12 @@
 validation loss = 1.396292056, validation accuracy = 0.64832
 test loss = 1.285343828, test accuracy = 0.67855
 
+# en unmapped 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 1.378705681, validation accuracy = 0.63838
+test loss = 1.271563926, test accuracy = 0.65729
+
+
 # en mapped
 {'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
 validation loss = 1.416710926, validation accuracy = 0.63812
@@ -17,6 +23,11 @@ test loss = 2.119395291, test accuracy = 0.41418
 {'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 7777}
 validation loss = 2.715628554, validation accuracy = 0.25475
 test loss = 2.70912724, test accuracy = 0.2644
+
+# es direct val w/ en, using unmapped 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 3.328630927, validation accuracy = 0.22024
+test loss = 3.29418337, test accuracy = 0.22359
 
 # es direct val w/ en
 {'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}

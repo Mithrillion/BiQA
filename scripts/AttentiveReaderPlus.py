@@ -36,6 +36,7 @@ class AttentiveReader(nn.Module):
         self._emb_trainable = emb_trainable
         self._story_rec_layers = story_rec_layers
         self.optimiser = opt
+        # self.bypass_softmax = False
 
         # create layers
 
@@ -113,10 +114,13 @@ class AttentiveReader(nn.Module):
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
 
-        ss = F.softmax(ms)
+        # if self.bypass_softmax:
+        #     ss = ms.squeeze()
+        # else:
+        ss = F.softmax(ms.squeeze(), dim=1)
 
-        r = torch.sum(y_out * ss.expand_as(y_out), dim=1, keepdim=True)  # batch * 2hidden_size
-        out = self._output_layer(r.squeeze())
+        r = torch.sum(y_out * ss.unsqueeze(2), dim=1)  # batch * 2hidden_size
+        out = self._output_layer(r)
         return out
 
     def train_on_batch(self, batch):
@@ -129,12 +133,12 @@ class AttentiveReader(nn.Module):
         self._reset_nil_gradients()
         torch.nn.utils.clip_grad_norm(self.parameters(), self._max_grad_norm)
         self.optimiser.step()
-        return loss.data, F.softmax(out)
+        return loss.data, F.softmax(out, dim=1)
 
     def predict(self, batch):
         """call net.eval() before calling this method!"""
         out = self.forward(batch)
-        return F.softmax(out)
+        return F.softmax(out, dim=1)
 
     def _reset_nil_gradients(self):
         if self._emb_trainable:

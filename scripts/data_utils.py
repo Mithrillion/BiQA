@@ -81,23 +81,56 @@ class QADataset(tud.Dataset):
         return s, q, s_len, q_len, s_var, q_var, answer
 
 
-# def get_embeddings(vocab, nr_unk=100, nr_var=600):
-#     # nr_vector = max(lex.rank for lex in vocab) + 1
-#     nr_vector = np.sum([x.has_vector for x in vocab])
-#     vectors = np.zeros((nr_vector + nr_unk + nr_var + 2, vocab.vectors_length), dtype='float32')
-#     dic = dict()
-#     i = 0
-#     np.seterr(all='raise')
-#     for lex in vocab:
-#         if lex.has_vector:
-#             try:
-#                 vectors[i + nr_unk + nr_var + 2, :] = lex.vector / lex.vector_norm
-#             except FloatingPointError:
-#                 # TODO: SpaCy bug that introduces new erroneous vectors that should not exist
-#                 pass
-#             dic[i] = lex.rank
-#             i += 1
-#     return vectors, dic
+class BiQADataset(tud.Dataset):
+    def __init__(self, data_df_1, data_df_2, nlp_1, nlp_2, rev_dic_1, rev_dic_2, relabel=True, l2_supersample=5):
+        self.data_df_1 = data_df_1
+        self.data_df_2 = data_df_2
+        self.nlp_1 = nlp_1
+        self.nlp_2 = nlp_2
+        self.rev_dic_1 = rev_dic_1
+        self.rev_dic_2 = rev_dic_2
+        self.relabel = relabel
+        self.l2_supersample = l2_supersample
+
+    def __len__(self):
+        return self.data_df_1.shape[0] + self.data_df_2.shape[0] * self.l2_supersample
+
+    def __getitem__(self, i):
+
+        if i < self.data_df_1.shape[0]:
+            story = self.nlp_1(self.data_df_1['story'].iloc[i].lower(), parse=False, tag=False, entity=False)
+            s, s_var, ent_dict = get_word_ids(story, max_length=2000, rev_dic=self.rev_dic_1, relabel=self.relabel)
+            s_len = np.sum(s != 0)
+
+            question = self.nlp_1(self.data_df_1['question'].iloc[i].lower(), parse=False, tag=False, entity=False)
+            q, q_var, ent_dict = get_word_ids(question, max_length=50, rev_dic=self.rev_dic_1, relabel=self.relabel,
+                                              ent_dict=ent_dict)
+            q_len = np.sum(q != 0)
+
+            if self.relabel:
+                answer = ent_dict[int(re.search(r'\d+', self.data_df_1['answer'].iloc[i]).group(0))]
+            else:
+                answer = int(re.search(r'\d+', self.data_df_1['answer'].iloc[i]).group(0))
+
+            return 0, s, q, s_len, q_len, s_var, q_var, answer
+
+        else:
+            i = (i - self.data_df_1.shape[0]) % self.data_df_2.shape[0]
+            story = self.nlp_2(self.data_df_2['story'].iloc[i].lower(), parse=False, tag=False, entity=False)
+            s, s_var, ent_dict = get_word_ids(story, max_length=2000, rev_dic=self.rev_dic_2, relabel=self.relabel)
+            s_len = np.sum(s != 0)
+
+            question = self.nlp_2(self.data_df_2['question'].iloc[i].lower(), parse=False, tag=False, entity=False)
+            q, q_var, ent_dict = get_word_ids(question, max_length=50, rev_dic=self.rev_dic_2, relabel=self.relabel,
+                                              ent_dict=ent_dict)
+            q_len = np.sum(q != 0)
+
+            if self.relabel:
+                answer = ent_dict[int(re.search(r'\d+', self.data_df_2['answer'].iloc[i]).group(0))]
+            else:
+                answer = int(re.search(r'\d+', self.data_df_2['answer'].iloc[i]).group(0))
+
+            return 1, s, q, s_len, q_len, s_var, q_var, answer
 
 
 def get_embeddings(f, nr_unk=100, nr_var=600, meta=None):

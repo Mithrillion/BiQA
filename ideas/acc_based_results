@@ -1,0 +1,89 @@
+# en original 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 1.405179197, validation accuracy = 0.64602
+test loss = 1.285391268, test accuracy = 0.66667
+
+# en original 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 2222}
+validation loss = 1.418028609, validation accuracy = 0.65545
+test loss = 1.287299016, test accuracy = 0.67761
+
+# en original 3
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 3333}
+validation loss = 1.494458195, validation accuracy = 0.64501
+test loss = 1.368597141, test accuracy = 0.6576
+
+# es <- en original cross no training 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 3.753176267, validation accuracy = 0.24056
+test loss = 3.702673189, test accuracy = 0.24573
+
+# es <- en original cross no training 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 2222}
+validation loss = 3.687408673, validation accuracy = 0.26947
+test loss = 3.57615092, test accuracy = 0.26527
+
+# es <- en original cross no training 3
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 3333}
+validation loss = 3.641119203, validation accuracy = 0.23118
+test loss = 3.626227156, test accuracy = 0.23401
+
+# es original 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'es', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 2.253528865, validation accuracy = 0.44986
+test loss = 2.362631509, test accuracy = 0.43155
+
+# es <- en original cross training 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 2.141395198, validation accuracy = 0.51954
+test loss = 2.137376503, test accuracy = 0.51795
+
+# es <- en original cross training 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 2222}
+validation loss = 2.151623405, validation accuracy = 0.52514
+test loss = 2.214607882, test accuracy = 0.50897
+
+# es <- en original cross training 3
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 3333}
+validation loss = 2.026877217, validation accuracy = 0.5323
+test loss = 2.030095195, test accuracy = 0.53661
+
+# en mapped 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 1.447799559, validation accuracy = 0.64934
+test loss = 1.337403585, test accuracy = 0.65885
+
+# en mapped 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 2222}
+validation loss = 1.381501534, validation accuracy = 0.65061
+test loss = 1.236989625, test accuracy = 0.67511
+
+# en mapped 3
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 3333}
+
+# es mapped 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'es', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 2.114074223, validation accuracy = 0.42524
+test loss = 2.12207041, test accuracy = 0.41476
+
+# es <- en mapped cross no training 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 2.423774301, validation accuracy = 0.31128
+test loss = 2.388585573, test accuracy = 0.32055
+
+# es <- en mapped cross no training 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 2222}
+validation loss = 2.330800695, validation accuracy = 0.35413
+test loss = 2.306351098, test accuracy = 0.35731
+
+# es <- en mapped cross no training 3
+
+# es <- en mapped cross training 1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+validation loss = 2.042732462, validation accuracy = 0.5353
+test loss = 2.055380835, test accuracy = 0.53039
+
+# es <- en mapped cross training 2
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 2222}
+validation loss = 1.82302528, validation accuracy = 0.53451
+test loss = 1.833507799, test accuracy = 0.52909

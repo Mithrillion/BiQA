@@ -2,12 +2,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Function
 from torch.nn import init
 from torch.nn.utils.rnn import pack_padded_sequence
 
 
-class AttentiveReader(nn.Module):
+class AttentiveReaderBilingual(nn.Module):
     """Attentive Reader"""
     def __init__(self, var_size, story_max_len, question_max_len, emb_vectors,
                  hidden_size=128,
@@ -24,7 +23,7 @@ class AttentiveReader(nn.Module):
                  discriminator_weight=0.5,
                  opt=None,
                  adv_opt=None):
-        super(AttentiveReader, self).__init__()
+        super(AttentiveReaderBilingual, self).__init__()
 
         # setting attributes
         self._var_size = var_size
@@ -45,11 +44,12 @@ class AttentiveReader(nn.Module):
         self._discriminator_weight = discriminator_weight
         self.optimiser = opt
         self.adv_optimiser = adv_opt
+        self.bypass_softmax = False
 
         # create layers
 
         # variable embeddings
-        assert(self._l1_emb_vector.shape[1] == self._l2_emb_vector)
+        assert(self._l1_emb_vector.shape[1] == self._l2_emb_vector.shape[1])
         self._l1_embedding_layer = nn.Embedding(self._l1_emb_vector.shape[0], self._l1_emb_vector.shape[1], 0)
         self._l2_embedding_layer = nn.Embedding(self._l2_emb_vector.shape[0], self._l2_emb_vector.shape[1], 0)
 
@@ -124,12 +124,12 @@ class AttentiveReader(nn.Module):
         lang, story, question, story_len, question_len = batch
         batch_size = story.size()[0]
 
-        # s_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(story)))
-        s_emb = self._dropout(self._l1_embedding_layer(story) * lang + self._l2_embedding_layer(story) * (1 - lang))
+        lang = lang.unsqueeze(1)
+        s_emb = self._dropout(self._l1_embedding_layer(story * (1 - lang))
+                              + self._l2_embedding_layer(story * lang))
 
-        # q_emb = self._embedding_projection_layer(self._dropout(self._embedding_layer(question)))
-        q_emb = self._dropout(self._l1_embedding_layer(question) * lang
-                              + self._l2_embedding_layer(question) * (1 - lang))
+        q_emb = self._dropout(self._l1_embedding_layer(question * (1 - lang))
+                              + self._l2_embedding_layer(question * lang))
 
         if self._pack:
             # TODO: still have to sort questions by length after mixing two languages
@@ -146,14 +146,17 @@ class AttentiveReader(nn.Module):
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
 
-        ss = F.softmax(ms)
+        if self.bypass_softmax:
+            ss = ms.squeeze()
+        else:
+            ss = F.softmax(ms.squeeze(), dim=1)
 
-        r = torch.sum(y_out * ss.expand_as(y_out), dim=1, keepdim=True)  # batch * 2hidden_size
+        r = torch.sum(y_out * ss.unsqueeze(2), dim=1)  # batch * 2hidden_size
 
-        out = self._output_layer(r.squeeze())
+        out = self._output_layer(r)
         # TODO: try different locations to insert adversarial network
         if self._adversarial:
-            discriminator_out = self._discriminator(ms)
+            discriminator_out = self._discriminator(r)
             return out, discriminator_out
         else:
             return out, None
@@ -165,10 +168,11 @@ class AttentiveReader(nn.Module):
         # TODO: use adversarial loss if enabled
         if self._adversarial:
             lang = batch[0]
-            # TODO: maximin
-            loss = nn.CrossEntropyLoss()(out, answers)\
-                - self._discriminator_weight * nn.BCEWithLogitsLoss()(discriminator_out, lang)
-            pass
+            # loss = nn.CrossEntropyLoss()(out, answers)\
+            #     - self._discriminator_weight * nn.BCEWithLogitsLoss()(discriminator_out, lang.unsqueeze(1))
+            answerer_loss = nn.CrossEntropyLoss()(out, answers)
+            discriminator_loss = nn.BCEWithLogitsLoss()(discriminator_out, lang.float().unsqueeze(1))
+            loss = answerer_loss - self._discriminator_weight * discriminator_loss
         else:
             loss = nn.CrossEntropyLoss()(out, answers)
         self.zero_grad()
@@ -180,7 +184,11 @@ class AttentiveReader(nn.Module):
             for p in self._discriminator.parameters():
                 p._grad = -p._grad
         self.optimiser.step()
-        return loss.data, F.softmax(out)
+        if self._adversarial:
+            return loss.data.cpu().numpy()[0], F.softmax(out, dim=1),\
+                   answerer_loss.data.cpu().numpy()[0], discriminator_loss.data.cpu().numpy()[0]
+        else:
+            return loss.data.cpu().numpy()[0], F.softmax(out, dim=1), loss.data.cpu().numpy()[0], 0
 
     def predict(self, batch):
         """call net.eval() before calling this method!"""
