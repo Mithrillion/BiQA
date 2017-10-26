@@ -512,7 +512,7 @@ if __name__ == '__main__':
 
         print("testing multi-step training!")
         # TODO: add to other parameter settings
-        # net.bypass_softmax = True
+        net.bypass_softmax = True
         for epoch in range(init_epoch, params['n_epochs']):
             print("epoch no.{0} start!".format(epoch + 1))
             # if epoch > 1:

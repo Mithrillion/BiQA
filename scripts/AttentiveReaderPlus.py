@@ -36,7 +36,7 @@ class AttentiveReader(nn.Module):
         self._emb_trainable = emb_trainable
         self._story_rec_layers = story_rec_layers
         self.optimiser = opt
-        # self.bypass_softmax = False
+        self.bypass_softmax = False
 
         # create layers
 
@@ -114,10 +114,10 @@ class AttentiveReader(nn.Module):
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
 
-        # if self.bypass_softmax:
-        #     ss = ms.squeeze()
-        # else:
-        ss = F.softmax(ms.squeeze(), dim=1)
+        if self.bypass_softmax:
+            ss = ms.squeeze()
+        else:
+            ss = F.softmax(ms.squeeze(), dim=1)
 
         r = torch.sum(y_out * ss.unsqueeze(2), dim=1)  # batch * 2hidden_size
         out = self._output_layer(r)
