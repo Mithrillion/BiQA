@@ -1,0 +1,24 @@
+en_mapped_run_1 (run_0)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+alidation loss = 1.420805744, validation accuracy = 0.64628
+test loss = 1.310815702, test accuracy = 0.66291
+
+en_mapped_run_1 direct cross es
+validation loss = 3.031844868, validation accuracy = 0.26778
+test loss = 3.057123302, test accuracy = 0.26405
+
+en_mapped_run_1 cross train es (run_1)
+validation loss = 1.640895369, validation accuracy = 0.559
+test loss = 1.619861718, test accuracy = 0.55827
+
+en_mapped_run_1 cross train es (run_2) - lr = 0.0001
+validation loss = 1.567552957, validation accuracy = 0.57567
+test loss = 1.599094995, test accuracy = 0.56622
+
+en_original_run_1 (run_3)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.0001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+
+
+en_es_mapped_mixed_1 (run 5)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'lang2': 'es', 'l2_supersample': 5, 'momentum': 0.8, 'adversarial': False, 'discriminator_hidden_size': 128, 'discriminator_weight': 0.5, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+both:

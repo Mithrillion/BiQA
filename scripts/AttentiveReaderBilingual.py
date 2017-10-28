@@ -44,7 +44,6 @@ class AttentiveReaderBilingual(nn.Module):
         self._discriminator_weight = discriminator_weight
         self.optimiser = opt
         self.adv_optimiser = adv_opt
-        self.bypass_softmax = False
 
         # create layers
 
@@ -125,10 +124,10 @@ class AttentiveReaderBilingual(nn.Module):
         batch_size = story.size()[0]
 
         lang = lang.unsqueeze(1)
-        s_emb = self._dropout(self._l1_embedding_layer(story * (1 - lang))
+        s_emb = self._dropout(self._l1_embedding_layer(story * (1 + (-1) * lang))
                               + self._l2_embedding_layer(story * lang))
 
-        q_emb = self._dropout(self._l1_embedding_layer(question * (1 - lang))
+        q_emb = self._dropout(self._l1_embedding_layer(question * (1 + (-1) * lang))
                               + self._l2_embedding_layer(question * lang))
 
         if self._pack:
@@ -146,14 +145,11 @@ class AttentiveReaderBilingual(nn.Module):
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
 
-        if self.bypass_softmax:
-            ss = ms.squeeze()
-        else:
-            ss = F.softmax(ms.squeeze(), dim=1)
+        ss = F.softmax(ms)
 
-        r = torch.sum(y_out * ss.unsqueeze(2), dim=1)  # batch * 2hidden_size
+        r = torch.sum(y_out * ss.expand_as(y_out), dim=1, keepdim=True)  # batch * 2hidden_size
+        out = self._output_layer(r.squeeze())
 
-        out = self._output_layer(r)
         # TODO: try different locations to insert adversarial network
         if self._adversarial:
             discriminator_out = self._discriminator(r)
@@ -185,15 +181,15 @@ class AttentiveReaderBilingual(nn.Module):
                 p._grad = -p._grad
         self.optimiser.step()
         if self._adversarial:
-            return loss.data.cpu().numpy()[0], F.softmax(out, dim=1),\
+            return loss.data.cpu().numpy()[0], \
                    answerer_loss.data.cpu().numpy()[0], discriminator_loss.data.cpu().numpy()[0]
         else:
-            return loss.data.cpu().numpy()[0], F.softmax(out, dim=1), loss.data.cpu().numpy()[0], 0
+            return loss.data.cpu().numpy()[0], loss.data.cpu().numpy()[0], 0
 
-    def predict(self, batch):
-        """call net.eval() before calling this method!"""
-        out, _ = self.forward(batch)
-        return F.softmax(out)
+    # def predict(self, batch):
+    #     """call net.eval() before calling this method!"""
+    #     out, _ = self.forward(batch)
+    #     return F.softmax(out)
 
     def _reset_nil_gradients(self):
         if self._emb_trainable:
@@ -217,3 +213,17 @@ class AttentiveReaderBilingual(nn.Module):
             ew1[1: 2 + self._nr_unk + self._var_size, :]
         self._l2_embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :] = \
             ew2[1: 2 + self._nr_unk + self._var_size, :]
+
+    # @staticmethod
+    # def softmax(inputs, dim=1):
+    #     input_size = inputs.size()
+    #
+    #     trans_input = inputs.transpose(dim, len(input_size) - 1)
+    #     trans_size = trans_input.size()
+    #
+    #     input_2d = trans_input.contiguous().view(-1, trans_size[-1])
+    #
+    #     soft_max_2d = F.softmax(input_2d)
+    #
+    #     soft_max_nd = soft_max_2d.view(*trans_size)
+    #     return soft_max_nd.transpose(dim, len(input_size) - 1)

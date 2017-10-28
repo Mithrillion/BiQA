@@ -53,11 +53,12 @@ def get_word_ids(doc, rnn_encode=True, max_length=100,
 
 
 class QADataset(tud.Dataset):
-    def __init__(self, data_df, nlp, rev_dic, relabel=True):
+    def __init__(self, data_df, nlp, rev_dic, relabel=True, lang_id=None):
         self.data_df = data_df
         self.nlp = nlp
         self.rev_dic = rev_dic
         self.relabel = relabel
+        self.lang_id = lang_id
 
     def __len__(self):
         return self.data_df.shape[0]
@@ -78,7 +79,10 @@ class QADataset(tud.Dataset):
         else:
             answer = int(re.search(r'\d+', self.data_df['answer'].iloc[i]).group(0))
 
-        return s, q, s_len, q_len, s_var, q_var, answer
+        if self.lang_id is not None:
+            return self.lang_id, s, q, s_len, q_len, s_var, q_var, answer
+        else:
+            return s, q, s_len, q_len, s_var, q_var, answer
 
 
 class BiQADataset(tud.Dataset):

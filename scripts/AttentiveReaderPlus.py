@@ -36,7 +36,6 @@ class AttentiveReader(nn.Module):
         self._emb_trainable = emb_trainable
         self._story_rec_layers = story_rec_layers
         self.optimiser = opt
-        self.bypass_softmax = False
 
         # create layers
 
@@ -114,13 +113,11 @@ class AttentiveReader(nn.Module):
                                                             self._hidden_size * 2))  # batched matrix
         ms = ms.bmm(q_hn)  # batched [col, col, col, ...] -> batched [scalar, scalar, scalar, ...]
 
-        if self.bypass_softmax:
-            ss = ms.squeeze()
-        else:
-            ss = F.softmax(ms.squeeze(), dim=1)
+        ss = F.softmax(ms)
 
-        r = torch.sum(y_out * ss.unsqueeze(2), dim=1)  # batch * 2hidden_size
-        out = self._output_layer(r)
+        r = torch.sum(y_out * ss.expand_as(y_out), dim=1, keepdim=True)  # batch * 2hidden_size
+        out = self._output_layer(r.squeeze())
+
         return out
 
     def train_on_batch(self, batch):
@@ -133,12 +130,12 @@ class AttentiveReader(nn.Module):
         self._reset_nil_gradients()
         torch.nn.utils.clip_grad_norm(self.parameters(), self._max_grad_norm)
         self.optimiser.step()
-        return loss.data, F.softmax(out, dim=1)
+        return loss.data
 
-    def predict(self, batch):
-        """call net.eval() before calling this method!"""
-        out = self.forward(batch)
-        return F.softmax(out, dim=1)
+    # def predict(self, batch):
+    #     """call net.eval() before calling this method!"""
+    #     out = self.forward(batch)
+    #     return F.softmax(out, dim=1)
 
     def _reset_nil_gradients(self):
         if self._emb_trainable:
@@ -159,3 +156,17 @@ class AttentiveReader(nn.Module):
         self._mix_matrix.data.copy_(mw)
         self._embedding_layer.weight.data[1: 2 + self._nr_unk + self._var_size, :] = \
             ew[1: 2 + self._nr_unk + self._var_size, :]
+
+    # @staticmethod
+    # def softmax(inputs, dim=1):
+    #     input_size = inputs.size()
+    #
+    #     trans_input = inputs.transpose(dim, len(input_size) - 1)
+    #     trans_size = trans_input.size()
+    #
+    #     input_2d = trans_input.contiguous().view(-1, trans_size[-1])
+    #
+    #     soft_max_2d = F.softmax(input_2d)
+    #
+    #     soft_max_nd = soft_max_2d.view(*trans_size)
+    #     return soft_max_nd.transpose(dim, len(input_size) - 1)

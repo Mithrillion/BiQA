@@ -13,6 +13,7 @@ import spacy
 import argparse
 import json
 import os.path as path
+from pycrayon import CrayonClient
 
 
 def validate(network, dev_data_loader):
@@ -63,7 +64,7 @@ def validate_bireader(network, dev_data_loader, params):
 
         answerer_loss = nn.CrossEntropyLoss()(out_logits, y).data.cpu().numpy()[0]  # crucial!
         if params["adversarial"]:
-            discriminator_loss = nn.BCEWithLogitsLoss()(discriminator_out, ln.float().unsqueeze(1))\
+            discriminator_loss = nn.BCEWithLogitsLoss()(discriminator_out, ln.float().unsqueeze(1)) \
                 .data.cpu().numpy()[0]  # crucial!
             val_loss = answerer_loss - params["discriminator_weight"] * discriminator_loss
             total_dis_loss += discriminator_loss
@@ -185,9 +186,14 @@ if __name__ == '__main__':
     parser.add_argument('-c', '--cross', type=str, help="target language for cross-lingual evaluation")
     parser.add_argument('-t', '--crosstrain', type=str, help="target language for cross-lingual training")
     parser.add_argument('-b', '--bilingual', action='store_true')
+    parser.add_argument('-l', '--log', action='store_true')
+    parser.add_argument('--overwritelr', type=float, help='overwrite the learning rate in params file')
+    parser.add_argument('--which', type=int, help='0/1?')
     arg = parser.parse_args()
     params_file = path.join(arg.params, "params.json")
     params = json.load(open(params_file, "rb"))
+    if arg.overwritelr:
+        params['learning_rate'] = arg.overwritelr
     print(params)
     checkpoint_file = path.join(arg.params, "checkpoint.{0}.pth.tar".format(params['lang']))
     best_file = path.join(arg.params, "model_best.{0}.pth.tar".format(params['lang']))
@@ -203,7 +209,7 @@ if __name__ == '__main__':
         nlp_1 = spacy.load(params['lang'], vectors=False)
         nlp_2 = spacy.load(params['lang2'], vectors=False)
         print("loading data...")
-        if arg.validate:
+        if arg.validate and arg.which is None:
             print("now validating...")
             dev_1 = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang']))
             dev_2 = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang2']))
@@ -236,8 +242,49 @@ if __name__ == '__main__':
                   format(loss_score, acc_score))
             print("answerer loss = {0:.10}, discrim. loss = {1:.10}".
                   format(ans_loss_score, dis_loss_score))
+        elif arg.validate and arg.which is not None:
+            print("now validating...")
+            print("validating language {0}".format([params['lang'], params['lang2']][arg.which]))
+            dev = pd.read_pickle("../input_data/dev_{0}.pkl".format([params['lang'], params['lang2']][arg.which]))
+            nlp = [nlp_1, nlp_2][arg.which]
+            rev_dic = [rev_dic_1, rev_dic_2][arg.which]
+            dev_loader = tud.DataLoader(QADataset(dev, nlp, rev_dic,
+                                                  relabel=params['relabel'], lang_id=arg.which),
+                                        batch_size=params['batch_size'],
+                                        pin_memory=True, num_workers=3)
+            test = pd.read_pickle("../input_data/test_{0}.pkl".format([params['lang'], params['lang2']][arg.which]))
+            test_loader = tud.DataLoader(QADataset(test, nlp, rev_dic,
+                                                   relabel=params['relabel'], lang_id=arg.which),
+                                         batch_size=params['batch_size'],
+                                         pin_memory=True, num_workers=3)
+            checkpoint_file = path.join(arg.params, "checkpoint.{0}.{1}.pth.tar".format(params['lang'],
+                                                                                        params['lang2']))
+            best_file = path.join(arg.params, "model_best.{0}.{1}.pth.tar".format(params['lang'], params['lang2']))
+            print("loading states...")
+            best_state = torch.load(best_file)
+            net.load_state_dict(best_state['state_dict'])
+            del best_state
+            print("evaluating validation performance...")
+            net.eval()
+            loss_score, ans_loss_score, dis_loss_score, acc_score = validate_bireader(net, dev_loader, params)
+            print("validation loss = {0:.10}, validation accuracy = {1:.5}".
+                  format(loss_score, acc_score))
+            print("answerer loss = {0:.10}, discrim. loss = {1:.10}".
+                  format(ans_loss_score, dis_loss_score))
+            loss_score, ans_loss_score, dis_loss_score, acc_score = validate_bireader(net, test_loader, params)
+            print("validation loss = {0:.10}, validation accuracy = {1:.5}".
+                  format(loss_score, acc_score))
+            print("answerer loss = {0:.10}, discrim. loss = {1:.10}".
+                  format(ans_loss_score, dis_loss_score))
 
         else:
+
+            if arg.log:
+                # crayon client
+                cc = CrayonClient(hostname="localhost", port=8889)
+                existing = len(cc.get_experiment_names())
+                ce = cc.create_experiment("run_{0}".format(existing), zip_file=None)
+
             print("now training...")
             train_1 = pd.read_pickle("../input_data/train_{0}.pkl".format(params['lang']))
             train_2 = pd.read_pickle("../input_data/train_{0}.pkl".format(params['lang2']))
@@ -251,16 +298,16 @@ if __name__ == '__main__':
             dev_1 = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang']))
             dev_2 = pd.read_pickle("../input_data/dev_{0}.pkl".format(params['lang2']))
             dev_loader = tud.DataLoader(BiQADataset(dev_1, dev_2, nlp_1, nlp_2,
-                                                    rev_dic_1, rev_dic_2, relabel=params['relabel'],
-                                                    l2_supersample=0  # debug
-                                                    ),
+                                                    rev_dic_1, rev_dic_2, relabel=params['relabel']),
                                         batch_size=params['batch_size'],
                                         pin_memory=True, num_workers=3)
             # best_acc = 0
             best_loss = np.inf
             init_epoch = 0
-            checkpoint_file = path.join(arg.params, "checkpoint.{0}.{1}.pth.tar".format(params['lang'], params['lang2']))
-            best_file = path.join(arg.params, "model_best.{0}.{1}.pth.tar".format(params['lang'], params['lang2']))
+            checkpoint_file = path.join(arg.params, "checkpoint.{0}.{1}.pth.tar".format(params['lang'],
+                                                                                        params['lang2']))
+            best_file = path.join(arg.params, "model_best.{0}.{1}.pth.tar".format(params['lang'],
+                                                                                  params['lang2']))
 
             print("starting training!")
             for epoch in range(init_epoch, params['n_epochs']):
@@ -282,7 +329,7 @@ if __name__ == '__main__':
                     xy = (ln, s, q, sl, ql, y)
 
                     net.train()
-                    loss, _, ans_loss, dis_loss = net.train_on_batch(xy)
+                    loss, ans_loss, dis_loss = net.train_on_batch(xy)
                     cum_loss += loss
                     cum_ans_loss += ans_loss
                     cum_dis_loss += dis_loss
@@ -296,6 +343,13 @@ if __name__ == '__main__':
                         print("iteration {0}/{1}\ntraining loss =    {2:.10}\nanswerer loss =    {3:.10}\n"
                               "discriminator loss={4:.10}".
                               format(i, len(train_loader), cum_loss / 100., cum_ans_loss / 100., cum_dis_loss / 100.))
+                        if arg.log:
+                            ce.add_scalar_value("training loss",
+                                                cum_loss / 100., step=epoch * len(train_loader) + i)
+                            ce.add_scalar_value("answerer loss",
+                                                cum_ans_loss / 100., step=epoch * len(train_loader) + i)
+                            ce.add_scalar_value("discriminator loss",
+                                                cum_dis_loss / 100., step=epoch * len(train_loader) + i)
                         cum_loss = 0
                         cum_ans_loss = 0
                         cum_dis_loss = 0
@@ -310,6 +364,13 @@ if __name__ == '__main__':
                         is_best = loss_score < best_loss
                         if is_best:
                             best_loss = loss_score
+                        if arg.log:
+                            ce.add_scalar_value("validation loss", loss_score, step=epoch * len(train_loader) + i)
+                            ce.add_scalar_value("validation answerer loss", ans_loss_score,
+                                                step=epoch * len(train_loader) + i)
+                            ce.add_scalar_value("validation discriminator loss", dis_loss_score,
+                                                step=epoch * len(train_loader) + i)
+                            ce.add_scalar_value("validation acc", acc_score, step=epoch * len(train_loader) + i)
                         save_checkpoint(
                             {
                                 'epoch': epoch,
@@ -390,6 +451,13 @@ if __name__ == '__main__':
               format(loss_score, acc_score))
 
     elif arg.crosstrain is not None:
+
+        if arg.log:
+            # crayon client
+            cc = CrayonClient(hostname="localhost", port=8889)
+            existing = len(cc.get_experiment_names())
+            ce = cc.create_experiment("run_{0}".format(existing), zip_file=None)
+
         print("starting cross-lingual training...")
         print("building network...")
         nlp = spacy.load(arg.crosstrain, vectors=False)
@@ -417,23 +485,10 @@ if __name__ == '__main__':
         checkpoint_file = path.join(arg.params, "cross_checkpoint.{0}.pth.tar".format(arg.crosstrain))
         best_file = path.join(arg.params, "cross_model_best.{0}.pth.tar".format(arg.crosstrain))
         # TODO: allow cross-training to be resumed
-        # if params['resume']:
-        #     print("loading saved states...")
-        #     # resume test
-        #     saved_state = torch.load(checkpoint_file)
-        #     best_state = torch.load(best_file)
-        #     net.load_state_dict(saved_state['state_dict'])
-        #     init_epoch = saved_state['epoch']
-        #     best_loss = best_state['epoch_val_loss']
-        #     del best_state
 
         print("starting training!")
-        # net.bypass_softmax = True
         for epoch in range(init_epoch, params['n_epochs']):
             print("epoch no.{0} start!".format(epoch + 1))
-
-            # if epoch > 1:
-            #     net.bypass_softmax = False
 
             i = 0
             cum_loss = 0
@@ -448,7 +503,7 @@ if __name__ == '__main__':
                 xy = (s, q, sl, ql, y)
 
                 net.train()
-                loss, out = net.train_on_batch(xy)
+                loss = net.train_on_batch(xy)
                 cum_loss += loss.cpu().numpy()[0]
 
                 if i % 100 == 1:
@@ -457,6 +512,8 @@ if __name__ == '__main__':
                         cum_loss *= 50
                     print("iteration {0}/{1}\ntraining loss =   {2:.10}".
                           format(i, len(train_loader), cum_loss / 100.))
+                    if arg.log:
+                        ce.add_scalar_value("training loss", cum_loss / 100., step=epoch * len(train_loader) + i)
                     cum_loss = 0
                 if i % 1000 == 1 or i == len(train_loader) - 1:
                     net.eval()
@@ -471,6 +528,9 @@ if __name__ == '__main__':
                         best_loss = val_loss
                         # best_acc = acc
                     # print("checkpoint loss = {0:.10}".format(checkpoint_val_loss))
+                    if arg.log:
+                        ce.add_scalar_value("validation loss", val_loss, step=epoch * len(train_loader) + i)
+                        ce.add_scalar_value("validation acc", acc, step=epoch * len(train_loader) + i)
                     save_checkpoint(
                         {
                             'epoch': epoch,
@@ -484,6 +544,12 @@ if __name__ == '__main__':
                         best_name=best_file)
 
     else:
+        if arg.log:
+            # crayon client
+            cc = CrayonClient(hostname="localhost", port=8889)
+            existing = len(cc.get_experiment_names())
+            ce = cc.create_experiment("run_{0}".format(existing), zip_file=None)
+
         print("building network...")
         nlp = spacy.load(params['lang'], vectors=False)
         net, dic, rev_dic = define_network(params)
@@ -512,11 +578,8 @@ if __name__ == '__main__':
 
         print("testing multi-step training!")
         # TODO: add to other parameter settings
-        net.bypass_softmax = True
         for epoch in range(init_epoch, params['n_epochs']):
             print("epoch no.{0} start!".format(epoch + 1))
-            # if epoch > 1:
-            #     net.bypass_softmax = False
             i = 0
             cum_loss = 0
             for i, batch in enumerate(train_loader):
@@ -530,7 +593,7 @@ if __name__ == '__main__':
                 xy = (s, q, sl, ql, y)
 
                 net.train()
-                loss, out = net.train_on_batch(xy)
+                loss = net.train_on_batch(xy)
                 cum_loss += loss.cpu().numpy()[0]
 
                 if i % 100 == 1:
@@ -539,6 +602,8 @@ if __name__ == '__main__':
                         cum_loss *= 50
                     print("iteration {0}/{1}\ntraining loss =   {2:.10}".
                           format(i, len(train_loader), cum_loss / 100.))
+                    if arg.log:
+                        ce.add_scalar_value("training loss", cum_loss / 100., step=epoch * len(train_loader) + i)
                     cum_loss = 0
                 if i % 1000 == 1 or i == len(train_loader) - 1:
                     net.eval()
@@ -553,6 +618,9 @@ if __name__ == '__main__':
                         best_loss = val_loss
                         # best_acc = acc
                     # print("checkpoint loss = {0:.10}".format(checkpoint_val_loss))
+                    if arg.log:
+                        ce.add_scalar_value("validation loss", val_loss, step=epoch * len(train_loader) + i)
+                        ce.add_scalar_value("validation acc", acc, step=epoch * len(train_loader) + i)
                     save_checkpoint(
                         {
                             'epoch': epoch,

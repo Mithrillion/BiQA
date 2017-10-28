@@ -174,10 +174,10 @@ class AttentiveReader(nn.Module):
         # self._embedding_layer.weight.data[0, :] = 0
 
     @staticmethod
-    def softmax(inputs, axis=1):
+    def softmax(inputs, dim=1):
         input_size = inputs.size()
 
-        trans_input = inputs.transpose(axis, len(input_size) - 1)
+        trans_input = inputs.transpose(dim, len(input_size) - 1)
         trans_size = trans_input.size()
 
         input_2d = trans_input.contiguous().view(-1, trans_size[-1])
@@ -185,4 +185,4 @@ class AttentiveReader(nn.Module):
         soft_max_2d = F.softmax(input_2d)
 
         soft_max_nd = soft_max_2d.view(*trans_size)
-        return soft_max_nd.transpose(axis, len(input_size) - 1)
+        return soft_max_nd.transpose(dim, len(input_size) - 1)
