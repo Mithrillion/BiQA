@@ -95,6 +95,22 @@ def predict_in_domain(story_vars, out_logits):
     return np.array(out_seq)
 
 
+def set_optimiser(net, params):
+    if params['optimiser'] == 'sgd/momentum':
+        net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'],
+                                  momentum=params['momentum'])
+    elif params['optimiser'] == 'sgd':
+        net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'],
+                                  momentum=0)
+    elif params['optimiser'] == 'adam':
+        net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'])
+    elif params['optimiser'] == 'adadelta':
+        net.optimiser = optim.Adadelta(filter(lambda p: p.requires_grad, net.parameters()),
+                                       lr=params['learning_rate'])
+    else:
+        raise NotImplementedError("Invalid optimiser!")
+
+
 def define_network(params, cross=None, requires_optim=True):
     if cross:
         lang = cross
@@ -116,19 +132,7 @@ def define_network(params, cross=None, requires_optim=True):
                           story_rec_layers=params['story_rec_layers'])
 
     if requires_optim:
-        if params['optimiser'] == 'sgd/momentum':
-            net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'],
-                                      momentum=params['momentum'])
-        elif params['optimiser'] == 'sgd':
-            net.optimiser = optim.SGD(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'],
-                                      momentum=0)
-        elif params['optimiser'] == 'adam':
-            net.optimiser = optim.Adam(filter(lambda p: p.requires_grad, net.parameters()), lr=params['learning_rate'])
-        elif params['optimiser'] == 'adadelta':
-            net.optimiser = optim.Adadelta(filter(lambda p: p.requires_grad, net.parameters()),
-                                           lr=params['learning_rate'])
-        else:
-            raise NotImplementedError("Invalid optimiser!")
+        set_optimiser(net, params)
 
     net.cuda()
     print("network initialised!")
@@ -632,3 +636,8 @@ if __name__ == '__main__':
                         is_best,
                         filename=checkpoint_file,
                         best_name=best_file)
+
+            if 'lr_decay' in params:
+                params['learning_rate'] *= params['lr_decay']
+                print("learning rate changed to {0}!".format(params['learning_rate']))
+                set_optimiser(net, params)
