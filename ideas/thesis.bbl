@@ -1,0 +1,126 @@
+\begin{thebibliography}{10}
+
+\bibitem{andrenucci2005automated}
+{\sc Andrenucci, A., and Sneiders, E.}
+\newblock Automated question answering: Review of the main approaches.
+\newblock In {\em Information Technology and Applications, 2005. ICITA 2005.
+  Third International Conference on\/} (2005), vol.~1, IEEE, pp.~514--519.
+
+\bibitem{banko2001mitigating}
+{\sc Banko, M., and Brill, E.}
+\newblock Mitigating the paucity-of-data problem: Exploring the effect of
+  training corpus size on classifier performance for natural language
+  processing.
+\newblock In {\em Proceedings of the first international conference on Human
+  language technology research\/} (2001), Association for Computational
+  Linguistics, pp.~1--5.
+
+\bibitem{bojanowski2016enriching}
+{\sc Bojanowski, P., Grave, E., Joulin, A., and Mikolov, T.}
+\newblock Enriching word vectors with subword information.
+\newblock {\em arXiv preprint arXiv:1607.04606\/} (2016).
+
+\bibitem{chen2016thorough}
+{\sc Chen, D., Bolton, J., and Manning, C.~D.}
+\newblock A thorough examination of the cnn/daily mail reading comprehension
+  task.
+\newblock {\em arXiv preprint arXiv:1606.02858\/} (2016).
+
+\bibitem{cho2014learning}
+{\sc Cho, K., Van~Merri{\"e}nboer, B., Gulcehre, C., Bahdanau, D., Bougares,
+  F., Schwenk, H., and Bengio, Y.}
+\newblock Learning phrase representations using rnn encoder-decoder for
+  statistical machine translation.
+\newblock {\em arXiv preprint arXiv:1406.1078\/} (2014).
+
+\bibitem{graves2016hybrid}
+{\sc Graves, A., Wayne, G., Reynolds, M., Harley, T., Danihelka, I.,
+  Grabska-Barwi{\'n}ska, A., Colmenarejo, S.~G., Grefenstette, E., Ramalho, T.,
+  Agapiou, J., et~al.}
+\newblock Hybrid computing using a neural network with dynamic external memory.
+\newblock {\em Nature 538}, 7626 (2016), 471--476.
+
+\bibitem{hermann2015teaching}
+{\sc Hermann, K.~M., Kocisky, T., Grefenstette, E., Espeholt, L., Kay, W.,
+  Suleyman, M., and Blunsom, P.}
+\newblock Teaching machines to read and comprehend.
+\newblock In {\em Advances in Neural Information Processing Systems\/} (2015),
+  pp.~1693--1701.
+
+\bibitem{hirschman2001natural}
+{\sc Hirschman, L., and Gaizauskas, R.}
+\newblock Natural language question answering: the view from here.
+\newblock {\em natural language engineering 7}, 4 (2001), 275--300.
+
+\bibitem{hochreiter1997long}
+{\sc Hochreiter, S., and Schmidhuber, J.}
+\newblock Long short-term memory.
+\newblock {\em Neural computation 9}, 8 (1997), 1735--1780.
+
+\bibitem{joshi2017triviaqa}
+{\sc Joshi, M., Choi, E., Weld, D.~S., and Zettlemoyer, L.}
+\newblock Triviaqa: A large scale distantly supervised challenge dataset for
+  reading comprehension.
+\newblock {\em arXiv preprint arXiv:1705.03551\/} (2017).
+
+\bibitem{kalchbrenner2014convolutional}
+{\sc Kalchbrenner, N., Grefenstette, E., and Blunsom, P.}
+\newblock A convolutional neural network for modelling sentences.
+\newblock {\em arXiv preprint arXiv:1404.2188\/} (2014).
+
+\bibitem{kumar2016ask}
+{\sc Kumar, A., Irsoy, O., Ondruska, P., Iyyer, M., Bradbury, J., Gulrajani,
+  I., Zhong, V., Paulus, R., and Socher, R.}
+\newblock Ask me anything: Dynamic memory networks for natural language
+  processing.
+\newblock In {\em International Conference on Machine Learning\/} (2016),
+  pp.~1378--1387.
+
+\bibitem{lehnert1977conceptual}
+{\sc Lehnert, W.~G.}
+\newblock A conceptual theory of question answering.
+\newblock In {\em Proceedings of the 5th international joint conference on
+  Artificial intelligence-Volume 1\/} (1977), Morgan Kaufmann Publishers Inc.,
+  pp.~158--164.
+
+\bibitem{mikolov2013efficient}
+{\sc Mikolov, T., Chen, K., Corrado, G., and Dean, J.}
+\newblock Efficient estimation of word representations in vector space.
+\newblock {\em arXiv preprint arXiv:1301.3781\/} (2013).
+
+\bibitem{pennington2014glove}
+{\sc Pennington, J., Socher, R., and Manning, C.}
+\newblock Glove: Global vectors for word representation.
+\newblock In {\em Proceedings of the 2014 conference on empirical methods in
+  natural language processing (EMNLP)\/} (2014), pp.~1532--1543.
+
+\bibitem{rajpurkar2016squad}
+{\sc Rajpurkar, P., Zhang, J., Lopyrev, K., and Liang, P.}
+\newblock Squad: 100,000+ questions for machine comprehension of text.
+\newblock {\em arXiv preprint arXiv:1606.05250\/} (2016).
+
+\bibitem{sukhbaatar2015end}
+{\sc Sukhbaatar, S., Weston, J., Fergus, R., et~al.}
+\newblock End-to-end memory networks.
+\newblock In {\em Advances in neural information processing systems\/} (2015),
+  pp.~2440--2448.
+
+\bibitem{trischler2016newsqa}
+{\sc Trischler, A., Wang, T., Yuan, X., Harris, J., Sordoni, A., Bachman, P.,
+  and Suleman, K.}
+\newblock Newsqa: A machine comprehension dataset.
+\newblock {\em arXiv preprint arXiv:1611.09830\/} (2016).
+
+\bibitem{weston2015towards}
+{\sc Weston, J., Bordes, A., Chopra, S., Rush, A.~M., van Merri{\"e}nboer, B.,
+  Joulin, A., and Mikolov, T.}
+\newblock Towards ai-complete question answering: A set of prerequisite toy
+  tasks.
+\newblock {\em arXiv preprint arXiv:1502.05698\/} (2015).
+
+\bibitem{weston2014memory}
+{\sc Weston, J., Chopra, S., and Bordes, A.}
+\newblock Memory networks.
+\newblock {\em arXiv preprint arXiv:1410.3916\/} (2014).
+
+\end{thebibliography}

@@ -1,0 +1,33 @@
+\contentsline {section}{\numberline {1}Introduction}{4}
+\contentsline {section}{\numberline {2}Background}{4}
+\contentsline {subsection}{\numberline {2.1}Brief History of Question Answering in NLP}{5}
+\contentsline {subsection}{\numberline {2.2}Problem Formulation}{6}
+\contentsline {section}{\numberline {3}Current Research in Neural QA}{8}
+\contentsline {subsection}{\numberline {3.1}Datasets and Benchmarks}{8}
+\contentsline {paragraph}{CNN / Daily Mail }{8}
+\contentsline {paragraph}{bAbI}{9}
+\contentsline {paragraph}{TriviaQA}{9}
+\contentsline {subsection}{\numberline {3.2}Neural Networks and Deep Learning in NLP}{9}
+\contentsline {paragraph}{Recurrent Network Architectures}{9}
+\contentsline {paragraph}{Word Embeddings}{10}
+\contentsline {paragraph}{Phrase and Sentence Representations}{11}
+\contentsline {subsection}{\numberline {3.3}Question Answering with Neural Networks}{11}
+\contentsline {subsection}{\numberline {3.4}Multilingual NLP}{11}
+\contentsline {section}{\numberline {4}Challenges for NLP in Low Resource Languages}{11}
+\contentsline {section}{\numberline {5}Transfer Learning}{12}
+\contentsline {section}{\numberline {6}Proposed Solutions}{13}
+\contentsline {section}{\numberline {7}Model Description}{13}
+\contentsline {subsection}{\numberline {7.1}Base QA Model}{13}
+\contentsline {subsection}{\numberline {7.2}Sequential Transfer Learning}{13}
+\contentsline {subsection}{\numberline {7.3}Joint Learning with Adversarial Training}{13}
+\contentsline {section}{\numberline {8}Data Collection}{13}
+\contentsline {subsection}{\numberline {8.1}Data Collection Strategy}{13}
+\contentsline {subsection}{\numberline {8.2}Source Corpus Compilation}{13}
+\contentsline {subsection}{\numberline {8.3}Data Preprocessing for QA Task}{13}
+\contentsline {section}{\numberline {9}Experiments}{13}
+\contentsline {subsection}{\numberline {9.1}Experiment Setup}{13}
+\contentsline {subsection}{\numberline {9.2}Results}{13}
+\contentsline {section}{\numberline {10}Discussions}{13}
+\contentsline {section}{\numberline {11}Conclusion}{13}
+\contentsline {section}{\numberline {12}Future Work}{13}
+\contentsline {section}{\numberline {A}Appendix}{15}
