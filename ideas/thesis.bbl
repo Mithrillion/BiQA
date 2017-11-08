@@ -88,6 +88,11 @@
 \newblock Efficient estimation of word representations in vector space.
 \newblock {\em arXiv preprint arXiv:1301.3781\/} (2013).
 
+\bibitem{elmundosample}
+{\sc Mundo, E.}
+\newblock Trump insinúa en japón que volverá a colocar a corea del norte
+  entre los países que apoyan el terrorismo.
+
 \bibitem{pennington2014glove}
 {\sc Pennington, J., Socher, R., and Manning, C.}
 \newblock Glove: Global vectors for word representation.

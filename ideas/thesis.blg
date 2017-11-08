@@ -3,44 +3,47 @@ Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
 The top-level auxiliary file: thesis.aux
 The style file: acm.bst
 Database file #1: thesis.bib
-You've used 20 entries,
+Warning--entry type for "elmundosample" isn't style-file defined
+--line 276 of file thesis.bib
+You've used 21 entries,
             2253 wiz_defined-function locations,
-            636 strings with 8229 characters,
-and the built_in function-call counts, 8107 in all, are:
-= -- 757
-> -- 485
+            639 strings with 8358 characters,
+and the built_in function-call counts, 8306 in all, are:
+= -- 773
+> -- 492
 < -- 0
-+ -- 201
-- -- 178
-* -- 643
-:= -- 1306
-add.period$ -- 60
-call.type$ -- 20
-change.case$ -- 147
++ -- 204
+- -- 180
+* -- 650
+:= -- 1337
+add.period$ -- 62
+call.type$ -- 21
+change.case$ -- 151
 chr.to.int$ -- 0
-cite$ -- 20
-duplicate$ -- 288
-empty$ -- 574
-format.name$ -- 178
-if$ -- 1679
+cite$ -- 21
+duplicate$ -- 296
+empty$ -- 597
+format.name$ -- 180
+if$ -- 1722
 int.to.chr$ -- 0
-int.to.str$ -- 20
+int.to.str$ -- 21
 missing$ -- 20
-newline$ -- 103
-num.names$ -- 40
-pop$ -- 155
+newline$ -- 107
+num.names$ -- 42
+pop$ -- 163
 preamble$ -- 1
-purify$ -- 127
+purify$ -- 130
 quote$ -- 0
-skip$ -- 216
+skip$ -- 226
 stack$ -- 0
-substring$ -- 424
-swap$ -- 100
+substring$ -- 429
+swap$ -- 102
 text.length$ -- 0
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 80
+type$ -- 84
 warning$ -- 0
-while$ -- 67
-width$ -- 22
-write$ -- 196
+while$ -- 69
+width$ -- 23
+write$ -- 203
+(There was 1 warning)

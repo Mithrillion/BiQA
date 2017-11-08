@@ -22,12 +22,17 @@
 \contentsline {subsection}{\numberline {7.3}Joint Learning with Adversarial Training}{13}
 \contentsline {section}{\numberline {8}Data Collection}{13}
 \contentsline {subsection}{\numberline {8.1}Data Collection Strategy}{13}
-\contentsline {subsection}{\numberline {8.2}Source Corpus Compilation}{13}
-\contentsline {subsection}{\numberline {8.3}Data Preprocessing for QA Task}{13}
-\contentsline {section}{\numberline {9}Experiments}{13}
-\contentsline {subsection}{\numberline {9.1}Experiment Setup}{13}
-\contentsline {subsection}{\numberline {9.2}Results}{13}
-\contentsline {section}{\numberline {10}Discussions}{13}
-\contentsline {section}{\numberline {11}Conclusion}{13}
-\contentsline {section}{\numberline {12}Future Work}{13}
-\contentsline {section}{\numberline {A}Appendix}{15}
+\contentsline {subsection}{\numberline {8.2}Source Corpus Compilation}{14}
+\contentsline {paragraph}{bullet points}{15}
+\contentsline {paragraph}{story}{15}
+\contentsline {subsection}{\numberline {8.3}Data Preprocessing for QA Task}{15}
+\contentsline {paragraph}{questions}{16}
+\contentsline {paragraph}{answers}{16}
+\contentsline {paragraph}{story}{16}
+\contentsline {section}{\numberline {9}Experiments}{16}
+\contentsline {subsection}{\numberline {9.1}Experiment Setup}{16}
+\contentsline {subsection}{\numberline {9.2}Results}{16}
+\contentsline {section}{\numberline {10}Discussions}{16}
+\contentsline {section}{\numberline {11}Conclusion}{16}
+\contentsline {section}{\numberline {12}Future Work}{16}
+\contentsline {section}{\numberline {A}Appendix}{19}
