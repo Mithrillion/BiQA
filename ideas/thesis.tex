@@ -198,7 +198,7 @@ In Gouws et al. \cite{gouws2015bilbowa}, a different alignment approach is propo
 A typical offline alignment algorithm ("align after training") is Mikolov et al.'s translation matrix method \cite{mikolov2013exploiting}, in which a transformation matrix is used to project the vector representations of one language so that the distance between the source and target language vectors are minimised on a set of translation pairs. i.e.
 \[ \min_W || Wx_i - z_i||^2 \] where $i$ is the index of translation pairs, and $x_i$, $z_i$ are embedding vectors of the i-th word in language 1 and 2 repsectively.
 
-Despite only using a simple linear transformation, this approach is surprisingly effective on top of being cheap to calculate, likely due to the fact that it does not significantly disrupt the linear relationships between monolingual words. A later research by Artetxe et al. found that the distance minimisation objective works best when all word vectors are normalised, and the transformation matrix $W$ is contrained to be orthogonal, as such a treatment perserves the relative distance and position of monolingual word vectors and minimises monolingual performance loss while still achieving good cross-lingual performance boost \cite{artetxe2016learning}. In the latest research on this topic by Artetxe et al., it is found that this offline alignment procedure does not necessarily have to rely on a large set of carefully-selected aligned words, and in the most extreme case, simply aligning the numerals between two languages and gradually expanding the alignment can already achieve reasonable performance \cite{artetxe2017learning}.
+Despite only using a simple linear transformation, this approach is surprisingly effective on top of being cheap to calculate, likely due to the fact that it does not significantly disrupt the linear relationships between monolingual words. A later research by Artetxe et al. found that the distance minimisation objective works best when all word vectors are normalised, and the transformation matrix $W$ is contrained to be orthogonal, as such a treatment perserves the relative distance and position of monolingual word vectors and minimises monolingual performance loss while still achieving good cross-lingual performance boost \cite{artetxe2016learning}. In the latest research on this topic by Artetxe et al., it is found that this offline alignment procedure does not necessarily have to rely on a large set of carefully-selected aligned words, and in the most extreme case, simply aligning the numerals between two languages and gradually expanding the alignment can already achieve reasonable performance in tasks such as word analogy \cite{artetxe2017learning}.
 
 
 \section{Challenges for NLP in Low Resource Languages}
@@ -410,7 +410,7 @@ Notice that $\Theta_\phi$ and $\Theta_\gamma$ are parameters of the answerer net
 
 \subsection{Experiment Setup}
 
-The network architectures from the previous chapter are implemented in PyTorch 0.2. For word embeddings, we use the trimmed version of the pre-trained 300-dimensional FastText vectors provided in \cite{bojanowski2016enriching} and their aligned versions, as described in the "Data collection" section. For words in the news articles that do not have an existing embedding vector, we map them to one of the 100 randomly generated embedding vectors (all instances of the same word are mapped to the same vector). For entity tokens and placeholder tokens, we also map them to random embedding vectors sampled from a normal distribution. All embedding vectors in our experiments are normalised to length 1. Throughout our experiments, we do not perform fine-tuning on embedding vectors and use them as is. (Main reason for this is that fine-tuning on the embedding vectors would expose the answerer network to the language label of the input indirectly in the joint + adversarial training case, which is not desirable.)
+The network architectures from the previous chapter are implemented in PyTorch 0.2. For word embeddings, we use the trimmed version of the pre-trained 300-dimensional FastText vectors provided in \cite{bojanowski2016enriching} and their aligned versions, as described in the "Data collection" section. For words in the news articles that do not have an existing embedding vector, we map them to one of the 100 randomly generated embedding vectors (all instances of the same word are mapped to the same vector). For entity tokens and placeholder tokens, we also map them to random embedding vectors sampled from a normal distribution. All embedding vectors in our experiments are normalised to length 1. We share the embeddings of the entity tokens between two languages in all tasks. Throughout our experiments, we do not perform fine-tuning on embedding vectors and use them as is. (Main reason for this is that fine-tuning on the embedding vectors would expose the answerer network to the language label of the input indirectly in the joint + adversarial training case, which is not desirable.)
 
 For our model parameters, we mostly use the same values recommended by Chen et al. \cite{chen2016thorough}. We use a batch size of 32. For the biRNNs, we use a hidden layer size of 128. We apply a dropout rate of 0.2 on the embedding layer output. For the initial training of models as well as joint training, we use the Adam optimiser \cite{kingma2014adam} with a learning rate of 0.001. For fine-tuning, we use Adam with learning rate 0.0001. 
 
@@ -421,13 +421,79 @@ Similar to \cite{chen2016thorough}, we adopt a few additional techniques to impr
 	\item Using a bilinear term instead of a dot product for similarity measure between the question and contextualised story word representations.
 \end{itemize}
 
+For adversarial training, a weight must be given to the discriminator loss to balance the importance of answerer objective and discriminator objective. The weight of the discriminator loss is set to 0.1 after parameter tuning.
+
 The experiments are run on a cluster with nVidia P100 GPUs. The average training time for single language model training takes approximately 2-3 hours before hitting early stopping criteria. Fine-tuning takes 1-2 hours on average. Joint models takes approximately 4-5 hours to converge.
 
 \subsection{Results}
 
+\begin{center}
+	\begin{table}
+		\begin{tabular}{| p{2.5cm} || p{2cm} | p{2cm} | p{2cm} | p{2cm} |}
+			\hline
+			& En. Mono. & Es. Mono. & En.$\to$Es. (no tuning) & En.$\to$Es. (tuned)\\
+			\hline
+			Unaligned Embeddings & 0.65666 & 0.42089 & 0.21908 & 0.54538 \\
+			\hline
+			Aligned Embeddings & 0.66291 & 0.41596 & 0.26405 & \textbf{0.56622} \\
+			\hline
+			Joint Training & 0.63226 & 0.51001 & - & - \\
+			\hline
+			Adversarial Training & \textbf{0.66979} & 0.5133 & - & (0.51714) \\
+			\hline
+		\end{tabular}
+		\caption{Experiment Results}\label{table:res}
+	\end{table}
+\end{center}
+
+The experiment results can be seen in table \ref{table:res}:
+
+The rows represent English monolingual performance, Spanish monolingual performance, English to Spanish transfer learning without fine-tuning, and English to Spanish transfer learning with fine-tuning. The columns represent sequential transfer learning using unaligned word embeddings, sequential transfer learning using embedding alignment, joint training of bilingual models and joint training of bilingual models with the adversarial term. Bold numbers are the best performance observed in all experiments on that language.
+
+We have the following observations based on the data:
+\begin{itemize}
+	\item In monolingual experiments without any transfer learning, the model performs much better on English tasks, most likely due to having 5 times as much training examples than Spanish.
+	\item Using aligned word embeddings do not noticeably degradate the monolingual performance of the QA model and in some cases even improve the performance, although the improvement is likely by chance. This confirms that word embedding alignment through orthogonal transformation preserves monolingual information.
+	\item Surprisingly, the best monolingual performance in English is achieved when using joint bilingual training with adversarial training. This is unexpected because the monolingual performance on Spanish data is much lower than English, so some moderate negative impact on English performance is expected even with the adversarial penalty term.
+	\item Sequential transfer learning through fine-tuning has a significant beneficial impact on Spanish task performance. This effect is large even when using unaligned embeddings.
+	\item Using aligned word embeddings further improves the performance of sequential transfer learning model on Spanish tasks, but not by as much as using fine-tuning itself.
+	\item Using aligned word embeddings without any fine-tuning (directly applying English model on Spanish test data) actually improves the performance on Spanish tasks, but it is much lower than the model trained on Spanish data alone.
+	\item Joint learning with adversarial learning does not seem to perform better for Spanish data than fine-tuning + aligned embeddings.
+\end{itemize} 
 
 
 \section{Discussions}
+
+\begin{center}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{media/curve.png}
+		\caption{Training Curve for Sequential Transfer Learning}
+		\label{fig:curve}
+	\end{figure}
+\end{center}
+
+\paragraph{Sequential Transfer Learning}
+There are several interesting observations from the experiment results. The first major observation is the effectiveness of sequential transfer learning through fine-tuning. It is remarkable to see a simple and relatively naive approach achieving over 20\% accuracy gain. We further investigate the performance gain through fine-tuning by comparing the training curve with and without fine-tuning (figure \ref{fig:curve}).
+
+As we see in figure \ref{fig:curve}, without any form of transfer learning, learning with Spanish tasks are slower and peak at below 45\% accuracy. Through fine-tuning of models initialised with English tasks, the model not only converges faster, but also achieves a higher performance in the end. When aligned word embeddings are used along with fine-tuning, the model converges at a similar rate to the fine-tuned model with original embeddings, but achieves slightly lower loss an higher accraucy.
+
+We have initially suspected that embedding alignment would be the more crucial step in sequential transfer learning, because it affects the input layer of the network and all downstream network parameters depend on it, also because shared word embeddings was shown to be helpful in other tasks like word analogy and machine translation \cite{mikolov2013exploiting,artetxe2017learning}. However, this is not the case according to our obseravtions. The majority of prediction accruacy gain comes not from word embedding alignment but fine-tuning of the network parameters. Although this appears to suggest the notion that fine-tuning plays a bigger role in cross-lingual transfer learning than aligned word embeddings, we have good reasons to believe it is highly task-dependent. The task we evaluate our models on favours the use of fine-tuning while does not rely on alignment of language representations as much. In particular:
+\begin{itemize}
+	\item Questions generated from news article bullet points are relatively simple, and typically do not require deep understanding of the text to answer. The questions can often be answered by context matching alone, without much need for further logical reasoning, as observed in \cite{chen2016thorough} for the original CNN / Daily Mail dataset. Our expansion of the dataset into the Spanish language is based on the same data collection and processing procedure, and therefore our dataset also inherits the same issue. The implication of this is that answering these questions does not require much language-dependent knowledge or even meaning-related knowledge that should be transfered from the source language to the target language. Often, simply finding the same or similar words in the story as in the question is sufficient to locate the answer. This diminishes the need and usefulness of shared word embeddings, which primarily transfers knowledge about word meaning and word relationships.
+	\item We used entity replacement to swap out all named entities in the news articles, and we further restricted all possible question answers to be from the set of entity tokens. This has the unintended effect of simplifying the question answering process to finding the right context around an entity token that best resembles that of the \textbf{@placeholder} token, then mapping the entity token back to its entity ID (class). This task is not strongly dependent on the particular form of language representation, and it is reasonable to believe that a network trained to perform this context matching and entity mapping task in one language can be expected to perform well in a second language with relatively little adjustments.
+	\item The reason that the model trained on Spanish data alone does not perform as well as fine-tuned model is likely that it does not have enough training examples to match similar context between the story and question (in the attention layer's $\phi_\sigma(\cdot)$) and to map an attended entity back to its ID (in the final dense layer). These are relatively trivial tasks and are essentially the same task regardless of the source language, so we can expect the large improvement by inheriting the model parameters from an English model.
+\end{itemize}
+
+Nevertheless, we still see a performance increase with the introduction of aligned word embeddings, indicating that some language-related knowledge transfer is still helpful for this particular task. It is reasonable to believe that in a QA task where language-related knowledge is utlised more frequently (such as when synonyms are often used interchangeably or when some deduction based on topics are involved), word mebedding alignment might be able to provide a more substantial boost to performance.
+
+\paragraph{Joint Training and Adversarial Training}
+Another interesting observation from the results is that although the use of adversarial training increases the performance of both languages compared to training them individually, the improvement of joint learning with adversarial training is not as large as using aligned embeddings with fine-tuning on the Spanish tasks. There are several likely reasons why fine-tuning appears to achieve higher performance:
+\begin{itemize}
+	\item The model is “overwhelmed” by English data. The training dataset of English tasks is 5 times as large as the Spanish dataset. This has the unfortunate effect of biasing the network towards performing better on English questions, even with the presence of the adversarial penalty term. We have attempted to remedy this through supersampling the Spanish data 1:5 to balance each minibatch, however that leads to higher overfitting and is overall even more detrimental to performance.
+	\item Similar to the discussion in the sequential transfer learning, the nature of our evaluation task is already language-independent to some degree. We train the adversarial network to distinguish attended word representations between source languages. However, since all possible answers are entity tokens (\textbf{@entityX}), whose embeddings are already shared between languages, and the network is trained to focus its attention on these tokens, the task itself is already language-independent to some degree, and therefore adversarial training cannot provide much contribution to the language-independence of this intermediate representation.
+\end{itemize}
+
+However, it is worth noting that the adversarial training model on English tasks actually manages to outperform the model trained solely in English. Apart from actual sharing of knowledge between English and Spanish tasks, we believe another factor might also play a role in this outcome. It is possible that the discriminator also serves as extra regularisation during training, as overfitted examples are more likely to be distinct from other examples and might end up being easier from the discriminator to classify its language. By penalising high discriminator accuracy it is likely that we are also controlling overfitting of training examples.
 
 
 

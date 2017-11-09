@@ -35,7 +35,9 @@
 \contentsline {section}{\numberline {8}Experiments}{26}
 \contentsline {subsection}{\numberline {8.1}Experiment Setup}{26}
 \contentsline {subsection}{\numberline {8.2}Results}{27}
-\contentsline {section}{\numberline {9}Discussions}{27}
-\contentsline {section}{\numberline {10}Conclusion}{27}
-\contentsline {section}{\numberline {11}Future Work}{27}
-\contentsline {section}{\numberline {A}Appendix}{31}
+\contentsline {section}{\numberline {9}Discussions}{28}
+\contentsline {paragraph}{Sequential Transfer Learning}{28}
+\contentsline {paragraph}{Joint Training and Adversarial Training}{30}
+\contentsline {section}{\numberline {10}Conclusion}{30}
+\contentsline {section}{\numberline {11}Future Work}{30}
+\contentsline {section}{\numberline {A}Appendix}{34}
