@@ -1,10 +1,30 @@
 \begin{thebibliography}{10}
 
+\bibitem{elmundosample}
+Trump insinúa en japón que volverá a colocar a corea del norte entre los
+  países que apoyan el terrorismo.
+\newblock
+  http://www.elmundo.es/internacional/2017/11/05/59fe7389ca47411b738b45db.html.
+\newblock Accessed: 2017-11-08.
+
 \bibitem{andrenucci2005automated}
 {\sc Andrenucci, A., and Sneiders, E.}
 \newblock Automated question answering: Review of the main approaches.
 \newblock In {\em Information Technology and Applications, 2005. ICITA 2005.
   Third International Conference on\/} (2005), vol.~1, IEEE, pp.~514--519.
+
+\bibitem{artetxe2016learning}
+{\sc Artetxe, M., Labaka, G., and Agirre, E.}
+\newblock Learning principled bilingual mappings of word embeddings while
+  preserving monolingual invariance.
+\newblock In {\em EMNLP\/} (2016), pp.~2289--2294.
+
+\bibitem{artetxe2017learning}
+{\sc Artetxe, M., Labaka, G., and Agirre, E.}
+\newblock Learning bilingual word embeddings with (almost) no bilingual data.
+\newblock In {\em Proceedings of the 55th Annual Meeting of the Association for
+  Computational Linguistics (Volume 1: Long Papers)\/} (2017), vol.~1,
+  pp.~451--462.
 
 \bibitem{banko2001mitigating}
 {\sc Banko, M., and Brill, E.}
@@ -26,12 +46,50 @@
   task.
 \newblock {\em arXiv preprint arXiv:1606.02858\/} (2016).
 
+\bibitem{cho2014properties}
+{\sc Cho, K., Van~Merri{\"e}nboer, B., Bahdanau, D., and Bengio, Y.}
+\newblock On the properties of neural machine translation: Encoder-decoder
+  approaches.
+\newblock {\em arXiv preprint arXiv:1409.1259\/} (2014).
+
 \bibitem{cho2014learning}
 {\sc Cho, K., Van~Merri{\"e}nboer, B., Gulcehre, C., Bahdanau, D., Bougares,
   F., Schwenk, H., and Bengio, Y.}
 \newblock Learning phrase representations using rnn encoder-decoder for
   statistical machine translation.
 \newblock {\em arXiv preprint arXiv:1406.1078\/} (2014).
+
+\bibitem{collobert2011natural}
+{\sc Collobert, R., Weston, J., Bottou, L., Karlen, M., Kavukcuoglu, K., and
+  Kuksa, P.}
+\newblock Natural language processing (almost) from scratch.
+\newblock {\em Journal of Machine Learning Research 12}, Aug (2011),
+  2493--2537.
+
+\bibitem{duong2017multilingual}
+{\sc Duong, L., Kanayama, H., Ma, T., Bird, S., and Cohn, T.}
+\newblock Multilingual training of crosslingual word embeddings.
+\newblock In {\em Proceedings of the 15th Conference of the European Chapter of
+  the Association for Computational Linguistics: Volume 1, Long Papers\/}
+  (2017), vol.~1, pp.~894--904.
+
+\bibitem{ganin2016domain}
+{\sc Ganin, Y., Ustinova, E., Ajakan, H., Germain, P., Larochelle, H.,
+  Laviolette, F., Marchand, M., and Lempitsky, V.}
+\newblock Domain-adversarial training of neural networks.
+\newblock {\em Journal of Machine Learning Research 17}, 59 (2016), 1--35.
+
+\bibitem{gouws2015bilbowa}
+{\sc Gouws, S., Bengio, Y., and Corrado, G.}
+\newblock Bilbowa: Fast bilingual distributed representations without word
+  alignments.
+\newblock In {\em Proceedings of the 32nd International Conference on Machine
+  Learning (ICML-15)\/} (2015), pp.~748--756.
+
+\bibitem{gouws2015simple}
+{\sc Gouws, S., and S{\o}gaard, A.}
+\newblock Simple task-specific bilingual word embeddings.
+\newblock In {\em HLT-NAACL\/} (2015), pp.~1386--1390.
 
 \bibitem{graves2016hybrid}
 {\sc Graves, A., Wayne, G., Reynolds, M., Harley, T., Danihelka, I.,
@@ -63,10 +121,20 @@
   reading comprehension.
 \newblock {\em arXiv preprint arXiv:1705.03551\/} (2017).
 
+\bibitem{kalchbrenner2013recurrent}
+{\sc Kalchbrenner, N., and Blunsom, P.}
+\newblock Recurrent continuous translation models.
+\newblock In {\em EMNLP\/} (2013), vol.~3, p.~413.
+
 \bibitem{kalchbrenner2014convolutional}
 {\sc Kalchbrenner, N., Grefenstette, E., and Blunsom, P.}
 \newblock A convolutional neural network for modelling sentences.
 \newblock {\em arXiv preprint arXiv:1404.2188\/} (2014).
+
+\bibitem{kingma2014adam}
+{\sc Kingma, D., and Ba, J.}
+\newblock Adam: A method for stochastic optimization.
+\newblock {\em arXiv preprint arXiv:1412.6980\/} (2014).
 
 \bibitem{kumar2016ask}
 {\sc Kumar, A., Irsoy, O., Ondruska, P., Iyyer, M., Bradbury, J., Gulrajani,
@@ -88,10 +156,16 @@
 \newblock Efficient estimation of word representations in vector space.
 \newblock {\em arXiv preprint arXiv:1301.3781\/} (2013).
 
-\bibitem{elmundosample}
-{\sc Mundo, E.}
-\newblock Trump insinúa en japón que volverá a colocar a corea del norte
-  entre los países que apoyan el terrorismo.
+\bibitem{mikolov2013exploiting}
+{\sc Mikolov, T., Le, Q.~V., and Sutskever, I.}
+\newblock Exploiting similarities among languages for machine translation.
+\newblock {\em arXiv preprint arXiv:1309.4168\/} (2013).
+
+\bibitem{miller2016key}
+{\sc Miller, A., Fisch, A., Dodge, J., Karimi, A.-H., Bordes, A., and Weston,
+  J.}
+\newblock Key-value memory networks for directly reading documents.
+\newblock {\em arXiv preprint arXiv:1606.03126\/} (2016).
 
 \bibitem{pennington2014glove}
 {\sc Pennington, J., Socher, R., and Manning, C.}
@@ -109,6 +183,15 @@
 \newblock End-to-end memory networks.
 \newblock In {\em Advances in neural information processing systems\/} (2015),
   pp.~2440--2448.
+
+\bibitem{TIEDEMANN12.463}
+{\sc Tiedemann, J.}
+\newblock Parallel data, tools and interfaces in opus.
+\newblock In {\em Proceedings of the Eight International Conference on Language
+  Resources and Evaluation (LREC'12)\/} (Istanbul, Turkey, may 2012), N.~C.~C.
+  Chair), K.~Choukri, T.~Declerck, M.~U. Dogan, B.~Maegaard, J.~Mariani,
+  J.~Odijk, and S.~Piperidis, Eds., European Language Resources Association
+  (ELRA).
 
 \bibitem{trischler2016newsqa}
 {\sc Trischler, A., Wang, T., Yuan, X., Harris, J., Sordoni, A., Bachman, P.,

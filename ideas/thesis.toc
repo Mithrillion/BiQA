@@ -12,27 +12,30 @@
 \contentsline {paragraph}{Word Embeddings}{10}
 \contentsline {paragraph}{Phrase and Sentence Representations}{11}
 \contentsline {subsection}{\numberline {3.3}Question Answering with Neural Networks}{11}
-\contentsline {subsection}{\numberline {3.4}Multilingual NLP}{11}
-\contentsline {section}{\numberline {4}Challenges for NLP in Low Resource Languages}{11}
-\contentsline {section}{\numberline {5}Transfer Learning}{12}
-\contentsline {section}{\numberline {6}Proposed Solutions}{13}
-\contentsline {section}{\numberline {7}Model Description}{13}
-\contentsline {subsection}{\numberline {7.1}Base QA Model}{13}
-\contentsline {subsection}{\numberline {7.2}Sequential Transfer Learning}{13}
-\contentsline {subsection}{\numberline {7.3}Joint Learning with Adversarial Training}{13}
-\contentsline {section}{\numberline {8}Data Collection}{13}
-\contentsline {subsection}{\numberline {8.1}Data Collection Strategy}{13}
-\contentsline {subsection}{\numberline {8.2}Source Corpus Compilation}{14}
-\contentsline {paragraph}{bullet points}{15}
-\contentsline {paragraph}{story}{15}
-\contentsline {subsection}{\numberline {8.3}Data Preprocessing for QA Task}{15}
-\contentsline {paragraph}{questions}{16}
-\contentsline {paragraph}{answers}{16}
-\contentsline {paragraph}{story}{16}
-\contentsline {section}{\numberline {9}Experiments}{16}
-\contentsline {subsection}{\numberline {9.1}Experiment Setup}{16}
-\contentsline {subsection}{\numberline {9.2}Results}{16}
-\contentsline {section}{\numberline {10}Discussions}{16}
-\contentsline {section}{\numberline {11}Conclusion}{16}
-\contentsline {section}{\numberline {12}Future Work}{16}
-\contentsline {section}{\numberline {A}Appendix}{19}
+\contentsline {paragraph}{Comparison of Traditional Approaches with Neural Network Methods}{11}
+\contentsline {paragraph}{Memory Networks}{11}
+\contentsline {paragraph}{Differentiable Neural Computer}{12}
+\contentsline {subsection}{\numberline {3.4}Multilingual NLP and Shared Embeddings}{13}
+\contentsline {section}{\numberline {4}Challenges for NLP in Low Resource Languages}{14}
+\contentsline {section}{\numberline {5}Transfer Learning}{15}
+\contentsline {section}{\numberline {6}Data Collection}{16}
+\contentsline {subsection}{\numberline {6.1}Data Collection Strategy}{16}
+\contentsline {subsection}{\numberline {6.2}Source Corpus Compilation}{17}
+\contentsline {paragraph}{bullet points}{18}
+\contentsline {paragraph}{story}{18}
+\contentsline {subsection}{\numberline {6.3}Data Preprocessing for QA Task}{18}
+\contentsline {paragraph}{questions}{19}
+\contentsline {paragraph}{answers}{19}
+\contentsline {paragraph}{story}{19}
+\contentsline {subsection}{\numberline {6.4}Word Embeddings}{19}
+\contentsline {section}{\numberline {7}Proposed Solutions and Model Description}{20}
+\contentsline {subsection}{\numberline {7.1}Base QA Model}{21}
+\contentsline {subsection}{\numberline {7.2}Sequential Transfer Learning}{21}
+\contentsline {subsection}{\numberline {7.3}Joint Learning with Adversarial Training}{23}
+\contentsline {section}{\numberline {8}Experiments}{26}
+\contentsline {subsection}{\numberline {8.1}Experiment Setup}{26}
+\contentsline {subsection}{\numberline {8.2}Results}{27}
+\contentsline {section}{\numberline {9}Discussions}{27}
+\contentsline {section}{\numberline {10}Conclusion}{27}
+\contentsline {section}{\numberline {11}Future Work}{27}
+\contentsline {section}{\numberline {A}Appendix}{31}

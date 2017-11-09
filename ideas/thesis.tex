@@ -100,7 +100,7 @@ Let $L_1$, $L_2$ be two languages, $C_1$, $C_2$ be documents from the two langua
 We learn a model on $L_1$:
 \[  M_1(C_1, Q_1) \to A_1\]
 Then we use $M_1$ and the $L_2$ data to learn a model in $L_2$, taking into account the shared knowledge with the same task in $L_1$:
-\[  M_2(C_1, Q_1 \vline M_1) \to A_2\]
+\[  M_2(C_2, Q_2 \vline M_1) \to A_2\]
 
 In later chapters we will also consider the cases where $M_1$ and $M_2$ are combined in the same model.
 
@@ -162,7 +162,43 @@ Another technique of interest is to exploit the recursive structure of a sentenc
 
 \subsection{Question Answering with Neural Networks}
 
-\subsection{Multilingual NLP}
+\paragraph{Comparison of Traditional Approaches with Neural Network Methods}
+Collobert, et al. \cite{collobert2011natural} proposed an multi-purpose neural network model for four different NLP tasks. Although not engineered carefully to utilise elaborate linguistic features, the model compares competitively with the state-of-the-art non-neural network NLP systems at the time, with some networks reaching within 1\% of the best model. Even though not a question answering model, this demonstrates that neural network models have great potential in natural language modelling and understanding.
+
+In Hermann, et al. \cite{hermann2015teaching} a comparison is made between the performance of traditional symbolic matching models and neural network models in CNN / Daily Mail reading comprehension tasks. The benchmarking shows an average 10\%+ improvement in accuracy of the best neural network models over the best symbolic matching models. 
+
+With more sophisticated model design (such as the architectures mentioned below), deep learning models have managed to exceed the performance of traditional NLP approaches in multiple domains. Apart from the improvement in methodology, the availability of large training data and the increase in computation power has contributed greatly to the rise of neual NLP models, as with other sub-fields of deep learning.
+
+\paragraph{Memory Networks}
+One of the most notable works in question answering with reasoning and inference is the Memory Network (MemNN) \cite{weston2014memory}. The main contribution of this research over earlier deep models such as deep LSTM is the introduction of an explicit long-term memory module, allowing information in the network to flow not only from the start of one layer to the end (as enabled by RNN layers), but also from one “scan” of the document to the next, allowing previous states (representing the intermediate result of reasoning) to direct and affect the re-interpretation of the facts at the next time step (via an attention mechanism), thus making multi-step reasoning and fact extraction more viable. 
+
+The memory network model is further improved in Sukhbaatar, et al. \cite{sukhbaatar2015end}, allowing it to be trained end-to-end and to be easily appliable to different tasks. In this version of the network, it is able to be trained to map a couple (facts, question) to an answer, which is usually represented as a probability vector over a limited vocabulary. The results on the bAbI dataset from the above two research demonstrate that the Memory Network is capable of performing exceptionally well on multiple types of reasoning tasks, approaching or even reaching zero error rate in some cases, but are still struggling with certain types of tasks such as “positional reasoning” and “path finding” tasks \cite{weston2014memory, sukhbaatar2015end}.
+
+There are still many potential areas of improvement for the Memory Network model, some of which are addressed in later research works (such as the DMN meontioned below). The representation of input sentences and the interaction of questions and facts are achieved with weighed averaging and inner product respectively, which are relatively simple approaches. The memory size of the network determines the maximum number of facts the model is able to process at the same time, which is not efficient when the fact input is long and irrelevant facts have to stay in memory for the entire duration. Despite a lack of further investigation, we suspect that the number of “rescans” (or reasoning layers) in the network is related to the network’s ability to perform multi-step reasoning (it is observed in the results of Sukhbaatar et al. that more “hops” or reasoning layers generally increase the performance on multi-step reasoning tasks). It is difficult to estimate for a given task, how many reasoning layers is optimal, and it is unknown whether the model can trained with variable number of layers.
+
+Other extensions to the memory network include the dynamic memory network (DMN) \cite{kumar2016ask} and key-value memory network \cite{miller2016key}.
+
+\paragraph{Differentiable Neural Computer}
+The differentiable neural computer (DNC) \cite{graves2016hybrid} is an external memory-augmented neural network model built to deal with multiple types of tasks in a way more akin to conventional computers. Instead of having the network learn a mapping from inputs to outputs directly, it trains the network to learn a set of operations to manipulate the memory and ultimately to generate the desired output. The network acts as a controller that not only handles input and output, but also issues and receives operations to read and write the memory. The main novelty of this research is the use of differentiable functions in all I/O, operation generation and operation execution steps which enables the training of the network as a whole. 
+
+Graves et al. \cite{graves2016hybrid} have shown in their work that the DNC is capable of learning text comprehension tasks, in this case using the bAbI dataset. The network takes individual word tokens as input (rather than whole sentence representations as in MemNN or DMN) and outputs an answer when a “question end” token is encountered.  An interesting difference between the DNC and previously mentioned models is that there are no explicit reasoning steps or revisiting of facts in the DNC model. The network learns the operations to store memory about the facts in the memory and to construct answers from the memories directly through supervised learning. Intuitively, it works like an active note-taker, who reads the facts, take “notes” about important information in the facts, reads the question, then piece together the answer from previous notes. The DNC is able to achieve lower error rates and task failure rates on bAbI tasks than previous models with only relatively weak performance in two of the tasks.
+
+The DNC is an interesting idea to combine the advantages of conventional and neural computing, and has shown great promise in its ability to solve a diverse set of tasks. It is worth further investigation to explore its application in question answering.
+
+\subsection{Multilingual NLP and Shared Embeddings}
+
+Neural NLP has also been applied to multilingual scenarios. The most obvious application of deep learning in multilingual NLP is machine translation. Most of the current neural machine translation models are based on the sequence-to-sequence encoder-decoder paradigm \cite{kalchbrenner2013recurrent, cho2014properties}, which uses an autoencoder-like architecture to transform input language representations into an intermediate representation ("encoding"), then decode back to natural language representations through a decoder network. Stacked RNNs are typically used for encoding and decoding of word sequences. The common theme of these methods is finding a shared representation of the source and target language as the "interlingua" for the translation task.
+
+Machine translation is regarded as one of the toughest problems in NLP, and thus it is undesirable to rely on machine translation as a preprocessing step for multilingual NLP. There has been several research on enabling multilingual representation sharing and knowledge transfer without the need to perform full machine translation. Since word embedding vectors are typically the entry point of a neural NLP process, finding shared embedded represenations for two or more languages has been an active area of research. Bilingual (or multilingual) word embeddings can be obtained by either aligning the embeddings in the training process, or aligning existing, pre-trained embeddings through projection or fine-tuning. Usually alignment during training are able to produce higher quality embeddings, but such embeddings might be prone to monolingual performance degradation and are more time- and resource-consuming to train. On the other hand, alignment after training might not produce as high performing results in cross-lingual tasks, but it is possible to avoid monolingual performance degradation and they are relatively cheap to compute.
+
+In Gouws and S{\o}gaard, an algorithm to train a bilingual word embedding using an arbitrary base embedding algorithm and a set of equivalence relationships is proposed \cite{gouws2015simple}. During the training of word embeddings, words are randomly replaced with their equivalences with a set probability so that in a sense, equivalences share their contexts. One major benefit of this approach is that it is not dependent on parallel corpora, and the specific equivalence classes used can be chosen to benefit the task (such as using part-of-speech equivalence instead of meaning equivalence to benefit POS tagging)\cite{gouws2015simple}. However, this alignment approach requires that the embeddings be trained for each bilingual pair and each equivalence relation individually.
+
+In Gouws et al. \cite{gouws2015bilbowa}, a different alignment approach is proposed, in which word alignment is not needed. Instead, word embeddings are trained on monolingual data individually and then the dissimilarity data on a smaller, sentence-aligned parallel corpus is minimised. This approach has the benefit of requiring less granularity in its aligned data input as well as providing moderate speedup compared to previous algorithms, however it is still not as fast as fully-offline methods \cite{gouws2015bilbowa}.
+
+A typical offline alignment algorithm ("align after training") is Mikolov et al.'s translation matrix method \cite{mikolov2013exploiting}, in which a transformation matrix is used to project the vector representations of one language so that the distance between the source and target language vectors are minimised on a set of translation pairs. i.e.
+\[ \min_W || Wx_i - z_i||^2 \] where $i$ is the index of translation pairs, and $x_i$, $z_i$ are embedding vectors of the i-th word in language 1 and 2 repsectively.
+
+Despite only using a simple linear transformation, this approach is surprisingly effective on top of being cheap to calculate, likely due to the fact that it does not significantly disrupt the linear relationships between monolingual words. A later research by Artetxe et al. found that the distance minimisation objective works best when all word vectors are normalised, and the transformation matrix $W$ is contrained to be orthogonal, as such a treatment perserves the relative distance and position of monolingual word vectors and minimises monolingual performance loss while still achieving good cross-lingual performance boost \cite{artetxe2016learning}. In the latest research on this topic by Artetxe et al., it is found that this offline alignment procedure does not necessarily have to rely on a large set of carefully-selected aligned words, and in the most extreme case, simply aligning the numerals between two languages and gradually expanding the alignment can already achieve reasonable performance \cite{artetxe2017learning}.
 
 
 \section{Challenges for NLP in Low Resource Languages}
@@ -184,8 +220,8 @@ Since building large datasets for different languages is difficult, it would be 
 
 If we consider two text comprehension tasks on two different languages, they are not entirely independent. There exist two main sources of information that can be shared between the tasks:
 \begin{itemize}
-\item[1] The languages themselves have some common linguistic features that can be exploited, such as words with equivalent meanings, similar syntactical structures in two languages, etc.
-\item[2] The task itself may require the same logical steps to complete, regardless of the language of its input and output.
+	\item[1] The languages themselves have some common linguistic features that can be exploited, such as words with equivalent meanings, similar syntactical structures in two languages, etc.
+	\item[2] The task itself may require the same logical steps to complete, regardless of the language of its input and output.
 \end{itemize}
 
 Therefore, in order to reuse the knowledge learned in a resource-rich language, we consider possible ways to exploit task similarities in these two aspects.
@@ -195,20 +231,6 @@ For exploiting similarities between two languages, the most straightforward appr
 For sharing common knowledge for the same task, we consider \textbf{reusing (or sharing) the same network / network layers} between two tasks, so that the network may learn to perform a certain function (such as context matching or reference resolution) on the resource-rich language and generalise it to the resource-limited language. 
 
 Generally, for transfer learning in neural networks, there are two basic approaches, namely fine-tuning (sequential training) and joint training (simultaneous training). The effectiveness of each strategy varies from task to task. In this research we consider both approaches and compare their performance in cross-lingual transfer learning.
-
-
-\section{Proposed Solutions}
-
-
-
-\section{Model Description}
-
-\subsection{Base QA Model}
-
-\subsection{Sequential Transfer Learning}
-
-\subsection{Joint Learning with Adversarial Training}
-
 
 
 \section{Data Collection}
@@ -224,11 +246,11 @@ To further ensure that the system actually learns to perform reading comprehensi
 \subsection{Source Corpus Compilation}
 
 \begin{center}
-\begin{figure}
-\includegraphics[width=\linewidth]{media/article.png}
-\caption{Example of Scraped Web Page from El Mundo (from \cite{elmundosample})}
-\label{fig:article}
-\end{figure}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{media/article.png}
+		\caption{Example of Scraped Web Page from El Mundo (from \cite{elmundosample})}
+		\label{fig:article}
+	\end{figure}
 \end{center}
 
 \begin{center}
@@ -256,30 +278,150 @@ To prepare a dataset in Spanish following the same format, we scrape a total of 
 \subsection{Data Preprocessing for QA Task}
 
 \begin{center}
-\begin{figure}
-\fbox{\begin{minipage}{30em}
-\paragraph{questions}
-\begin{itemize}
-\item @placeholder y su marido fueron asesinados en presencia de la hija de ambos de 5 años
-\item Han detenido a 7 personas intregrantes de la banda "@placeholder"
-\item @placeholder tiene una gran tasa de criminalidad: 39 asesinatos por cada 100.000 habitantes
-\end{itemize}
-\paragraph{answers}
-@entity10, @entity1, @entity12
-\paragraph{story}
-Esta semana @entity12 ha recibido una noticia que ha causado gran consternación en todo el país: el asesinato de la actriz, modelo y ex @entity8 @entity10 y de su esposo, el @entity13 @entity6 . El fatídico hecho se produjo en una autopista Venezolana cuando el matrimonio se disponía a regresar a su casa. En el interior del vehículo, se hallaron los cuerpos sin vida de la joven pareja y a la hija de ambos, de 5 años que también resultó herida.Miles de personas acudieron al velatorio de la pareja.
-...
-\end{minipage}}
-\caption{Generated Spanish QA pairs example}
-\label{fig:esqa}
-\end{figure}
+	\begin{figure}
+	\fbox{\begin{minipage}{30em}
+	\paragraph{questions}
+		\begin{itemize}
+			\item @placeholder y su marido fueron asesinados en presencia de la hija de ambos de 5 años
+			\item Han detenido a 7 personas intregrantes de la banda "@placeholder"
+			\item @placeholder tiene una gran tasa de criminalidad: 39 asesinatos por cada 100.000 habitantes
+		\end{itemize}
+	\paragraph{answers}
+	@entity10, @entity1, @entity12
+	\paragraph{story}
+	Esta semana @entity12 ha recibido una noticia que ha causado gran consternación en todo el país: el asesinato de la actriz, modelo y ex @entity8 @entity10 y de su esposo, el @entity13 @entity6 . El fatídico hecho se produjo en una autopista Venezolana cuando el matrimonio se disponía a regresar a su casa. En el interior del vehículo, se hallaron los cuerpos sin vida de la joven pareja y a la hija de ambos, de 5 años que también resultó herida.Miles de personas acudieron al velatorio de la pareja.
+	...
+	\end{minipage}}
+	\caption{Generated Spanish QA pairs example}
+	\label{fig:esqa}
+	\end{figure}
 \end{center}
 
 To match the entity anonymisation used in the CNN / Daily Mail dataset, we also perform entity recognition and replacement in the Spanish corpus. Named entity recognition is performed via the Google Cloud Natural Language API (https://cloud.google.com/natural-language/) and a list of named entities (including unique names, locations and organisations) are generated for each (story, bullet point) pair. For each (story, bullet point) pair, matched entities (such as the full name and abbreivations of the same organisation, or full name and last name of a person) are replaced with the same entity marker. Finally, one of the replaced entities in the bullet point is replaced with the \textbf{@placeholder} marker to generate the question. One bullet point may be used to generate multiple questions if it contains more than one entity from the story. We generate a total of 76K QA pairs via this process. An example of generated QA pairs can be seen in figure \ref{fig:esqa}.
 
+\subsection{Word Embeddings}
+
+In order to compare the transfer learning performance of the networks using unaligned word embeddings and aligned word embeddings, we need individual embedding vectors for both English and Spanish, as well as the aligned versions of these embedding vectors. In our experiments, we use the pre-trained 300-dimensional FastText embeddings \cite{bojanowski2016enriching} due to its large training corpus (Wikipedia) and availability for both languages. For embedding alignment, we use the algorithm outlined in Artexte et al. (2016) \cite{artetxe2016learning} to calculate aligned embeddings via orthogonal transformation (details in the next section). For the aligned vocabulary dictionary needed for embedding mapping, we use the alignement dictionary of OpenSubtitles 2012 parallel text dataset \cite{TIEDEMANN12.463}, available on the Open Parallel Corpus website (http://opus.lingfil.uu.se/index.php). The original FastText embedding vectors for English and Spanish exceed 6.6G and 2.6G respectively, and are thus required to be trimmed to the subset of words that are present in our news article QA datasets. The trimmed version of the embedding vectors are 210MB and 260MB respectively and can be easily handled with our existing experiment setup.
+
+
+
+\section{Proposed Solutions and Model Description}
+
+We propose two network architectures for implementation of cross-lingual transfer learning. The first approach relies on sequential transfer learning and use fine-tuning of models trained on a resource-rich language as the main technique of model adaptation. We also apply word embedding alignment as an additional technique of knowledge sharing. The second approach relies on the joint training of models on two languages simultaneously to directly share intermediate representations of the network. In order to encourage the network to learn a truly shared representation for both languages rather than learning two representations in the same network, we also experiment with adding a penalty term optimised via adversarial training.
+
+\subsection{Base QA Model}
+
+\begin{center}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{media/attentive.png}
+		\caption{Modified Attentive Reader (based on Hermann et al. \cite{hermann2015teaching} and Chen et al. \cite{chen2016thorough})}
+		\label{fig:attentive}
+	\end{figure}
+\end{center}
+
+For the base monlingual model for question answering, we adopt the improved attentive reader model described in Chen et al. \cite{chen2016thorough}. A basic outline of the network can be seen in figure \ref{fig:attentive}. The network applies two bidirectional RNNs on the embedding vectors of words in the story and question respectively, obtaining individual context-dependent word representations for each word in the story and a summary representation for the question. A similarity score is calculated between the representations of story words and the question to calculate the attention score of each word. A weighed sum of the story word representations (weighed by their attention scores) is then calculated to obtain the representation of the attended word(s). Finally, one or more dense layers act as the classifier to map the attended word(s) representation to the one-hot representation of the answer. The model can be formulated as follows:
+
+\textit{Let $C_i$ be the i-th word in the story, and let Q be the question. Let $R_i$ be the context-dependent representation of $C_i$ and $r$ be the summary representation of the question. We use $a_i$ to denote the attention score, $u$ to denote the attended word representation and $o$ the answer's class. $M$ is a matrix parameter in the bilinear term $R_i^T M r$ to add more expressiveness of the similarity function (as compared to simpler similarity measures like dot product), as suggested by Chen et al. \cite{chen2016thorough}.}
+
+\[ R_i = \phi_{RNN}^C(emb(C_i))[:] \] 
+\[ r = \phi_{RNN}^Q(emb(Q))[-1] \]
+\[ a_i = Softmax(R^T M r) \]
+\[ u = \sum_i a_i R_i \]
+\[ o = Softmax(\phi_{Linear}(u)) \]
+
+In practice, this model performs by matching the context in each story position with the question representation, find the positions that best match the \textbf{@placeholder} token's context and focus its attention on these positions. The weighed sum step evaluates the attention received by each position and finds the position with the maximum attention, which is assumed to be the position of the answer token. The final dense layer(s) then map the representation of the answer token (if the attention mechanism finds it correctly) back to its class (i.e. ID of the answer keyword).
+
+\subsection{Sequential Transfer Learning}
+
+In sequential transfer learning, we first learn a model on $L_1$:
+\[  M_1(C_1, Q_1) \to A_1\]
+Then we fine-tune the trained model $M_1$ on the $L_2$ data to adapt the model to $L_2$:
+\[  M_1'(C_2, Q_2) \to A_2\]
+where $M_1'$ is initialised with the parameters of $M_1$ and trained with lowered learning rate.
+
+In the most basic form of sequential transfer learning, the model is identical to the base monolingual QA model, except it is trained twice on two different languages. The intuition is that the weights of the network encode information about how to find a proper context-aware representation for word and phrases (mainly via the biRNN layer), as well as how to perform context matching and how to map attend entities back to answer word classes. Only the first step (calculating context-aware representations) is highly language-dependent, whereas the following steps can be though of as language-independent in the abstract sense. Therefore by fine-tuning the network, it should ideally "forget" about the language-dependent functions and retain the ability to perform the language-independent steps.
+
+We may also align the word embeddings so that similar words in the two different languages are represented by word vectors that are close to each other in the shared embedding space. In this way, we may reduce the distance between the representation of similar expressions in $L_1$ and $L_2$, and in turn hopefully reduce the difference between optimal weights of the network for $L_1$ and $L_2$. Perfect word embedding alignment of two languages is not possible, as it is equivalent to solving machine translation, which is an immensely difficult task. By applying the vector alignment technique introduced by Artetxe et al. \cite{artetxe2016learning}, it is possible to minimise the difference between two sets of word embeddings for a selected list of words. It is suggested in \cite{artetxe2016learning} as well as \cite{duong2017multilingual} that such an alignment procedure is also capable of aligning words outside of the alignment dictionary via the preservation of relative position of an arbitrary word relative to these "anchor" words, as discussed in chapter 3. Therefore, we may use the following objective to find the best projection for aligning two word embedding matrices:
+\[ arg\min_P ||PX_1 - X_2|| \]
+where P is an orthogonal matrix.
+
+We may then formulate the shared embedding model as follows:
+
+Define:
+\[ \phi(\cdot)=\phi^{RNN}((\phi^{word\_emb_{L_1, L_2}}(\cdot) + \phi^{entity\_emb}(\cdot)) \]
+\[ \sigma(R, r)=softmax(R^T M r) \]
+
+Then:
+\[ R_i^{(j)}[:]=\phi^{(C)}(C_i^{(j)})[:] \]
+\[ r_i^{(j)}=\phi^{(Q)}(Q_i^{(j)})[-1] \]
+\[ \gamma(R, r) = Softmax[Linear(\sigma(R, r)^T R)] \]
+
+And the training objective can be defined as:
+\[ argmin_{\Theta_\phi, \Theta_\gamma, \Theta_\sigma} -logP(A|Q, C, \Theta_\phi, \Theta_\gamma, \Theta_\sigma) \]
+We use $\Theta$ to denote the parameters for a certain network.
+
+\subsection{Joint Learning with Adversarial Training}
+
+In the joint learning approach, we train the same model to perform the same QA task in both languages. We have only one model:
+\[ M(C_i, Q_i) \to A_i \]
+where $i$ can either be 1 or 2. 
+
+In its most basic form, the network architecture is also identical to that of the base monolingual model, and the only difference is in the composition of the training examples. The network now takes a random mixture of training examples from two languages and has to predict the answer regardless of input language. For the simple joint training case, we use aligned word vectors as in the last section to increase task similarity between two languages.
+
+Two of the main challenges of joint training a network on two tasks are:
+\begin{itemize}
+	\item[1] If the network is too expressive (having more parameters than optimal), the network might overfit and learn two separate modes for two different tasks, undermining the whole point of joint training.
+	\item[2] If the network is not expressive enough, the network might fail to learn a useful shared intermediate representation for the two tasks, learning a set of "average weights" that perform well on neither tasks.
+\end{itemize}
+
+To avoid these issues, we have to find a way to encourage the network to share intermediate representations between tasks, or equivalently, penalise the network for using significantly different representations for separate tasks. Suppose $R^*$ is an ideal shared representation between tasks in $L_1$ and $L_2$, we wish to find a penalty term similar to the following form:
+\[ -\alpha (||R^* - R_1|| \cdot I_{L_1} + ||R^* - R_2|| \cdot I_{L_2}) \]
+(Here the $R$'s do not strictly correspond to the $R_i$'s in the base model. They may correspond to intermediate representations from $R_i$ and $r$ to $u$ in the orignal model, depending on implementation details, but the idea is the same: share representation between two tasks at some level of the network.)
+
+In other words, a penalty term that penalises the network for adopting an intermediate representation that is too different from the ideal, shared representation. However, such a penalty function does not readily exist because we cannot know the ideal shared representation $R^*$ beforehand. However, we do know that if $R_1$ and $R_2$ deviates from $R^*$ too much, they will be different from each other, and if the average of $||R_1 - R_2||$ is significant, a discriminator network can be trained to distinguish them from each other and determine their source language just by looking at these intermediate representations. Therefore it is possible to train a discriminator network whose performance score can serve as the penalty term for not sharing representations.
+
+We may formulate the network with the discriminator included as follows (choosing the attended word representation layer $u$ for applying the discriminator):
+
+(Same definition for $\phi(\cdot)$ and $\sigma(\cdot, \cdot)$ as above)
+\[ R_i^{(j)}[:]=\phi_i^{(C)}(C_i^{(j)})[:] \] 
+\[ r_i^{(j)}=\phi_i^{(Q)}(Q_i^{(j)})[-1] \]
+\[ u = \sigma(R, r)^T R \]
+\[ \gamma(u) = Softmax[Linear(u)] \]
+\[ \delta(u) = \delta^{MLP}(u) \]
+
+One challenge of training this network is that it has multiple objectives. The primary objective is to minimise the loss of the answerer network $\gamma$, but the answerer network also has to take into account the penalty term and lower the accuracy (i.e increase the loss) of the discriminator network. However, in the mean time, the discriminator network also has to be trained, and its weights should be optimised to lower the discriminator loss. These objectives are at odds with each other. Fortunately, it is possible to combine the training objectives of the answerer network and discriminator network together and simultaneously update their weights following opposite gradient directions, using an adversarial training technique introduced by Ganin et al. \cite{ganin2016domain}.
+
+\begin{center}
+	\begin{figure}
+		\includegraphics[width=\linewidth]{media/adversa.png}
+		\caption{Modified Attentive Reader with Adversarial Training}
+		\label{fig:adversa}
+	\end{figure}
+\end{center}
+
+
+We may write the joint training objective as follows:
+\[ argmin_{\Theta_\phi, \Theta_\gamma, -\Theta_\delta} [-logP(A|Q, C, \Theta_\phi, \Theta_\gamma) + \alpha \cdot log P(\lnot L|Q, C,\Theta_\phi, \Theta_\delta)] \]
+(we include $\Theta_\sigma$ in $\Theta_\phi$ for clarity)
+
+Notice that $\Theta_\phi$ and $\Theta_\gamma$ are parameters of the answerer network (part of the network in the base model), whereas $\Theta_\delta$ is the parameters of the discriminator network. This training objective follows the gradient of the answerer network weights to minimise answerer loss and maximise discriminator loss, and also simultaneously follows the negative gradient of the discriminator network weights to minimise the discriminator network loss. Intuitively there exists a competition between the answerer network and the discriminator network, where the discriminator network strives to best classify intermediate representations by their language, and the answerer network tries to confuse the discriminator network by outputing similar-looking intermediate representations. In this way, we are able to encourage the answerer network to produce an intermediate representation that shares as much information as possible between tasks from the two languages. The combined architecture of the answerer and discriminator network is shown in figure \ref{fig:adversa}.
+
 \section{Experiments}
 
 \subsection{Experiment Setup}
+
+The network architectures from the previous chapter are implemented in PyTorch 0.2. For word embeddings, we use the trimmed version of the pre-trained 300-dimensional FastText vectors provided in \cite{bojanowski2016enriching} and their aligned versions, as described in the "Data collection" section. For words in the news articles that do not have an existing embedding vector, we map them to one of the 100 randomly generated embedding vectors (all instances of the same word are mapped to the same vector). For entity tokens and placeholder tokens, we also map them to random embedding vectors sampled from a normal distribution. All embedding vectors in our experiments are normalised to length 1. Throughout our experiments, we do not perform fine-tuning on embedding vectors and use them as is. (Main reason for this is that fine-tuning on the embedding vectors would expose the answerer network to the language label of the input indirectly in the joint + adversarial training case, which is not desirable.)
+
+For our model parameters, we mostly use the same values recommended by Chen et al. \cite{chen2016thorough}. We use a batch size of 32. For the biRNNs, we use a hidden layer size of 128. We apply a dropout rate of 0.2 on the embedding layer output. For the initial training of models as well as joint training, we use the Adam optimiser \cite{kingma2014adam} with a learning rate of 0.001. For fine-tuning, we use Adam with learning rate 0.0001. 
+
+Similar to \cite{chen2016thorough}, we adopt a few additional techniques to improve the model performance: 
+\begin{itemize}
+	\item Using entity relabeling to label the entities based on their order of appearance. This we believe is potentially implicitly assigning different prior probabilities to entities appearing in different positions in an article. For instance, over time, the network may learn to assign higher answer probability to entities from the beginning of the story, as it is common for news articles to contain main points in opening paragraphs. This entity labeling strategy allows the network to exploit such patterns.
+	\item Predicting an answer only in the subset of entities that actually appear in a document.
+	\item Using a bilinear term instead of a dot product for similarity measure between the question and contextualised story word representations.
+\end{itemize}
+
+The experiments are run on a cluster with nVidia P100 GPUs. The average training time for single language model training takes approximately 2-3 hours before hitting early stopping criteria. Fine-tuning takes 1-2 hours on average. Joint models takes approximately 4-5 hours to converge.
 
 \subsection{Results}
 
