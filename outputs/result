@@ -8,9 +8,10 @@ test loss = 3.057123302, test accuracy = 0.26405
 cross train es (run_1)
 validation loss = 1.640895369, validation accuracy = 0.559
 test loss = 1.619861718, test accuracy = 0.55827
-cross train es (run_2) - lr = 0.0001
+cross train es (run_3) - lr = 0.0001
 validation loss = 1.567552957, validation accuracy = 0.57567
 test loss = 1.599094995, test accuracy = 0.56622
+
 
 en_original_run_1 (run_10)
 {'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.0001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
@@ -20,7 +21,8 @@ cross es
 validation loss = 3.381977604, validation accuracy = 0.2175
 test loss = 3.426590614, test accuracy = 0.21908
 cross train es (run_11) - lr = 0.0001
-
+validation loss = 1.611175507, validation accuracy = 0.55926
+test loss = 1.632777024, test accuracy = 0.54538
 
 
 en_es_mapped_mixed_1 (run 6)
@@ -41,6 +43,134 @@ answerer loss = 1.972205601, discrim. loss = 0.0
 validation loss = 2.058645915, validation accuracy = 0.46065
 answerer loss = 2.058645915, discrim. loss = 0.0
 
-es_mapped_run_2 (run 9)
+es_mapped_run_1
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'es', 'momentum': 0.8, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111, 'lr_decay': 0.5}
+no decay:
+validation loss = 2.060352235, validation accuracy = 0.43345
+test loss = 2.102279348, test accuracy = 0.41706
+decay (run_9):
 validation loss = 2.063366291, validation accuracy = 0.43475
 test loss = 2.099305622, test accuracy = 0.41596
+
+es_original_run_1 (run_12):
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'es', 'momentum': 0.8, 'selected_embedding': 'original', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111, 'lr_decay': 0.5}
+validation loss = 2.006487675, validation accuracy = 0.441
+test loss = 2.097488915, test accuracy = 0.42089
+
+en_es_mapped_adv_1 (run_13):
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'lang2': 'es', 'l2_supersample': 5, 'momentum': 0.8, 'adversarial': True, 'discriminator_hidden_size': 128, 'discriminator_weight': 0.01, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+both:
+validation loss = 1.954599722, validation accuracy = 0.4957
+answerer loss = 1.955564678, discrim. loss = 0.09649562115
+validation loss = 1.977990993, validation accuracy = 0.49223
+answerer loss = 1.979045966, discrim. loss = 0.1054973091
+en:
+validation loss = 1.676074608, validation accuracy = 0.56804
+answerer loss = 1.676985822, discrim. loss = 0.09112139597
+validation loss = 1.50480721, validation accuracy = 0.60006
+answerer loss = 1.505724655, discrim. loss = 0.09174453026
+es:
+validation loss = 2.021550865, validation accuracy = 0.48528
+answerer loss = 2.022525574, discrim. loss = 0.09747084977
+validation loss = 2.061297834, validation accuracy = 0.47189
+answerer loss = 2.062378948, discrim. loss = 0.1081114197
+
+en_es_mapped_adv_2 (run_14)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'lang2': 'es', 'l2_supersample': 5, 'momentum': 0.8, 'adversarial': True, 'discriminator_hidden_size': 128, 'discriminator_weight': 0.1, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+both:
+validation loss = 1.901620483, validation accuracy = 0.48177
+answerer loss = 1.964218003, discrim. loss = 0.6259751971
+validation loss = 1.92321821, validation accuracy = 0.47371
+answerer loss = 1.98665948, discrim. loss = 0.6344127057
+en:
+validation loss = 1.679851981, validation accuracy = 0.56269
+answerer loss = 1.714303212, discrim. loss = 0.3445123067
+validation loss = 1.513695972, validation accuracy = 0.59037
+answerer loss = 1.547513613, discrim. loss = 0.3381764117
+es:
+validation loss = 1.965539243, validation accuracy = 0.45741
+answerer loss = 2.033216728, discrim. loss = 0.6767748463
+validation loss = 1.984159689, validation accuracy = 0.45818
+answerer loss = 2.052876187, discrim. loss = 0.6871649835
+
+en_es_mapped_adv_3 (run_15)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'lang2': 'es', 'l2_supersample': 5, 'momentum': 0.8, 'adversarial': True, 'discriminator_hidden_size': 128, 'discriminator_weight': 0.05, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+both:
+validation loss = 1.955983952, validation accuracy = 0.4918
+answerer loss = 1.97117083, discrim. loss = 0.3037375541
+validation loss = 1.953733463, validation accuracy = 0.48575
+answerer loss = 1.967888617, discrim. loss = 0.2831030883
+en:
+validation loss = 1.606959177, validation accuracy = 0.57696
+answerer loss = 1.629585866, discrim. loss = 0.4525337726
+validation loss = 1.462753129, validation accuracy = 0.60381
+answerer loss = 1.484861939, discrim. loss = 0.4421761949
+es:
+validation loss = 2.02595082, validation accuracy = 0.48476
+answerer loss = 2.039591806, discrim. loss = 0.2728197246
+validation loss = 2.022912979, validation accuracy = 0.47299
+answerer loss = 2.036622331, discrim. loss = 0.274187038
+
+en_es_mapped_adv_4 (run_18)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'lang2': 'es', 'l2_supersample': 1, 'momentum': 0.8, 'adversarial': True, 'discriminator_hidden_size': 128, 'discriminator_weight': 0.05, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+both:
+validation loss = 1.643818806, validation accuracy = 0.55024
+answerer loss = 1.696561204, discrim. loss = 1.054847977
+validation loss = 1.680429817, validation accuracy = 0.53534
+answerer loss = 1.735061836, discrim. loss = 1.092640373
+en:
+validation loss = 1.391299599, validation accuracy = 0.63099
+answerer loss = 1.395801751, discrim. loss = 0.09004304113
+validation loss = 1.264839006, validation accuracy = 0.67355
+answerer loss = 1.269817038, discrim. loss = 0.09956063759
+es:
+validation loss = 1.709799179, validation accuracy = 0.52722
+answerer loss = 1.773761902, discrim. loss = 1.279254463
+validation loss = 1.743224579, validation accuracy = 0.51083
+answerer loss = 1.808873335, discrim. loss = 1.312975116
+es fine tune (run_19) - lr = 0.0001:
+validation loss = 1.709490895, validation accuracy = 0.52826
+answerer loss = 1.773486786, discrim. loss = 1.279917807
+validation loss = 1.746244328, validation accuracy = 0.51714
+answerer loss = 1.812032387, discrim. loss = 1.315761191
+es fine tune (run_20) - lr = 0.00001:
+validation loss = 1.706715667, validation accuracy = 0.53347
+answerer loss = 1.770573809, discrim. loss = 1.277162845
+validation loss = 1.751783705, validation accuracy = 0.5133
+answerer loss = 1.817492073, discrim. loss = 1.314167355
+
+en_es_mapped_adv_5 (run_23)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'lang2': 'es', 'l2_supersample': 1, 'momentum': 0.8, 'adversarial': True, 'discriminator_hidden_size': 128, 'discriminator_weight': 0.1, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+both:
+validation loss = 1.578022128, validation accuracy = 0.54479
+answerer loss = 1.690153196, discrim. loss = 1.121310674
+validation loss = 1.635379466, validation accuracy = 0.53623
+answerer loss = 1.749577722, discrim. loss = 1.141982561
+en:
+validation loss = 1.398622709, validation accuracy = 0.63863
+answerer loss = 1.411406335, discrim. loss = 0.1278362632
+validation loss = 1.265005662, validation accuracy = 0.66979
+answerer loss = 1.278608186, discrim. loss = 0.1360252409
+es:
+validation loss = 1.626782385, validation accuracy = 0.52357
+answerer loss = 1.759821597, discrim. loss = 1.330392124
+validation loss = 1.694718167, validation accuracy = 0.5133
+answerer loss = 1.825540977, discrim. loss = 1.308228091
+
+en_es_mapped_mixed_1 (run 24)
+{'batch_size': 32, 'hidden_size': 128, 'n_epochs': 30, 'var_size': 600, 'dropout': 0.2, 'learning_rate': 0.001, 'story_rec_layers': 1, 'resume': False, 'pack': True, 'emb_trainable': False, 'lang': 'en', 'lang2': 'es', 'l2_supersample': 1, 'momentum': 0.8, 'adversarial': False, 'discriminator_hidden_size': 128, 'discriminator_weight': 0.5, 'selected_embedding': 'mapped', 'embedding_meta': None, 'optimiser': 'adam', 'relabel': True, 'seed': 1111}
+both:
+validation loss = 1.715855932, validation accuracy = 0.53882
+answerer loss = 1.715855932, discrim. loss = 0.0
+validation loss = 1.764270605, validation accuracy = 0.52345
+answerer loss = 1.764270605, discrim. loss = 0.0
+en:
+validation loss = 1.425083664, validation accuracy = 0.63226
+answerer loss = 1.425083664, discrim. loss = 0.0
+validation loss = 1.299450941, validation accuracy = 0.66135
+answerer loss = 1.299450941, discrim. loss = 0.0
+es:
+validation loss = 1.778309286, validation accuracy = 0.5254
+answerer loss = 1.778309286, discrim. loss = 0.0
+validation loss = 1.816373832, validation accuracy = 0.51001
+answerer loss = 1.816373832, discrim. loss = 0.0

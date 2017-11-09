@@ -8,19 +8,95 @@
 
 \begin{document}
 
-\maketitle
+\begin{titlepage} % Suppresses headers and footers on the title page
+	
+	\centering % Centre everything on the title page
+	
+	%------------------------------------------------
+	%	Top rules
+	%------------------------------------------------
+	
+	\rule{\textwidth}{1pt} % Thick horizontal rule
+	
+	\vspace{2pt}\vspace{-\baselineskip} % Whitespace between rules
+	
+	\rule{\textwidth}{0.4pt} % Thin horizontal rule
+	
+	\vspace{0.1\textheight} % Whitespace between the top rules and title
+	
+	%------------------------------------------------
+	%	Title
+	%------------------------------------------------
+	
+	{\Huge Monash University}\\[0.5\baselineskip] % Title line 1
+	
+	\vspace{0.1\textheight}
+	
+	{\Large Learning neural Question Answering Systems for Low-resource Langauges}\\[0.5\baselineskip] % Title line 1
+	
+	\vspace{0.025\textheight} % Whitespace between the title and short horizontal rule
+	
+	\rule{0.3\textwidth}{0.4pt} % Short horizontal rule under the title
+	
+	\vspace{0.15\textheight} % Whitespace between the thin horizontal rule and the author name
+	
+	%------------------------------------------------
+	%	Author
+	%------------------------------------------------
+	
+	{This thesis is presented in partial fulfillment of the requirements for the degree of Bachelor of Information Technology (Honours) at Monash University}
+	
+	\vspace{0.05\textheight}
+	
+	{By:}\\
+	\vspace{0.01\textheight}
+	{\Large \textsc{Chenyang Wang}} % Author name
+	\vspace{0.05\textheight}
+	
+	{Supervisor:}\\
+	\vspace{0.01\textheight}
+	{\Large \textsc{Reza Haffari}} % Author name
+	\vspace{0.05\textheight}
+	
+	{Year:}\\
+	\vspace{0.01\textheight}
+	{\Large \textsc{2017}}
+	
+	\vfill % Whitespace between the author name and publisher
+	
+	%------------------------------------------------
+	%	Bottom rules
+	%------------------------------------------------
+	
+	\rule{\textwidth}{0.4pt} % Thin horizontal rule
+	
+	\vspace{2pt}\vspace{-\baselineskip} % Whitespace between rules
+	
+	\rule{\textwidth}{1pt} % Thick horizontal rule
+	
+\end{titlepage}
 
 \newpage
 \begin{abstract}
-ABSTRACT PLACEHOLDER
+Neural NLP in question answering has seen plenty of development in recent years, yet training data availability is still the main bottleneck of developing new neural QA systems. This is especially true for low-resource languages where dataset availability is highly limited. In this research we explore options to perform transfer learning from a resource-rich language to a resource-constrained language, including word embedding alignment, model fine-tuning, joint training and inducing shared representations with adversarial training. We evaluate the cross-lingual transfer learning performance of a combination of these methods on a English/Spanish bilingual question answering dataset. We found that for the QA problem being studied, fine-tuning with embedding alignment provides significant cross-lingual performance gain, and an adversarial training-based method also provide reasonable performance gain over monolingual models.
 \end{abstract}
+
+\newpage
+\section*{Declartion}
+I declare that this thesis is my own work and has not been submitted in any form for another degree or diploma at any university or other institute of tertiary education. Information derived from the work of others has been acknowledged.
+\newline\newline\newline
+Signed by \space \includegraphics[width=7em]{media/sig.png}
+\newline\newline\newline
+Chenyang Wang
+\newline
+\date{11/09/2017}
 
 \newpage
 \tableofcontents
 
 \newpage
 \section{Introduction}
-Text understanding and question answering have always been among some of the most challenging tasks in natural language processing. With the rise of deep learning and DNN-based learning algorithms, as well as the increasing availability of large training datasets, neural network-based QA has been steadily gaining traction. A competent question answering system has a wide variety of practical uses in areas such as automated online self-service, intelligent web search, AI personal assistants etc. In recent years, many influential models have been proposed in this field, such as Memory Networks \cite{sukhbaatar2015end}, Dynamic Memory Networks \cite{kumar2016ask} and Differentiable Neural Computers (DNC) \cite{graves2016hybrid}. These models are capable of tackling a large range of probelm types, such as text comprehension, simple logical reasoning and even graph-based reasoning. These systems are often capable of delivering much improved performances compared to older traditional NLP-based systems. However, just like other deep learning-based solutions, the training of these systems requires a large amount of input data. This is challenging in many NLP-problems, including question answering, because labelled datasets for a given task are usually still limited in both quality and quantity, especially when human annotation is required. This problem is even more profound when developing models for languages without much existing special-purpose datasets. For tasks such as text comprehension, there is a dataset bottleneck for training models on most languages other than English. This is challenging for anyone who wish to apply the latest research in neural question answering (and neural NLP in general) to these languages. However, considering that there exists some common linguistic features among different languages, and the same task in different languages may also share some similarities, it inspires us to consider the possibility of transfering the knowledge learned on a resource-rich language (such as English) to relatively resource-poor lanuages so that we can train a higher-performance model with only limited data in the target language. In this research, we analyse the difficulties of training a QA system on low-resource languages, propose two different approaches to transfer learning, examine their effectiveness and discuss about their implications. We found that for a simple text comprehension task, using a pre-trained English model with fine-tuning on the target language and alignment of word embeddings achieves a significant performance increase for the target language, while not requiring a large special-purpose dataset in the target language. This indicates that it is indeed possible to use relatively cheap cross-lingual transfer learning to assist the training of QA models on low-resource languages.
+Text understanding and question answering have always been among some of the most challenging tasks in natural language processing. With the rise of deep learning and DNN-based learning algorithms, as well as the increasing availability of large training datasets, neural network-based QA has been steadily gaining traction. A competent question answering system has a wide variety of practical uses in areas such as automated online self-service, intelligent web search, AI personal assistants etc. In recent years, many influential models have been proposed in this field, such as Memory Networks \cite{sukhbaatar2015end}, Dynamic Memory Networks \cite{kumar2016ask} and Differentiable Neural Computers (DNC) \cite{graves2016hybrid}. These models are capable of tackling a large range of problem types, such as text comprehension, simple logical reasoning, and even graph-based reasoning. These systems are often capable of delivering much-improved performances compared to older traditional NLP-based systems. However, just like other deep learning-based solutions, the training of these systems requires a large amount of input data. This is challenging in many NLP-problems, including question answering, because labelled datasets for a given task are usually still limited in both quality and quantity, especially when human annotation is required. This problem is even more profound when developing models for languages without many existing special-purpose datasets. For tasks such as text comprehension, there is a dataset bottleneck for training models in most languages other than English. This is challenging for anyone who wishes to apply the latest research in neural question answering (and neural NLP in general) to these languages. However, considering that there exist some common linguistic features among different languages and the same task in different languages may also share some similarities, it inspires us to consider the possibility of transferring the knowledge learned on a resource-rich language (such as English) to relatively resource-poor languages so that we can train a higher-performance model with only limited data in the target language. In this research, we analyse the difficulties of training a QA system on low-resource languages, propose two different approaches to transfer learning, examine their effectiveness and discuss their implications. We found that for a simple text comprehension task, using a pre-trained English model with fine-tuning on the target language and alignment of word embeddings achieves a significant performance increase for the target language, while not requiring a large special-purpose dataset in the target language. This indicates that it is indeed possible to use relatively cheap cross-lingual transfer learning to assist the training of QA models in low-resource languages.
 
 \section{Background}
 
@@ -37,7 +113,7 @@ etc.
 \end{itemize}
 
 \subsection{Brief History of Question Answering in NLP}
-Some well-known early research on natural language question answering were conducted in the 1960-70s, with limited success on providing a natural language frontend to structured knowledge bases within a narrow domain \cite{hirschman2001natural}.
+Some well-known early researches on natural language question answering were conducted in the 1960-70s, with limited success in providing a natural language frontend to structured knowledge bases within a narrow domain \cite{hirschman2001natural}.
 
 Early work on text comprehension started in the late 1970s, such as Lehnert’s theory of question answering \cite{lehnert1977conceptual}, which draws comparison between machine text comprehension and human comprehension, and outlines some basic requirements for a machine comprehension system to succeed.
 
@@ -111,7 +187,7 @@ While the traditional NLP systems often employ a rule-based system for parsing i
 
 \subsection{Datasets and Benchmarks}
 
-To compare different question answering techniques as well as to validate the effectiveness of new models, many benchmarking datasets and tools have been developed and adopted by researchers over the years. For instance, the TREC (Text Retrieval Conference) datasets are widely used for information retrieval benchmarking. For text comprehension and reasoning over text data, traditionally there was a lack of large, high quality datasets suitable for the task. In recent years, several new datasets have been proposed to meet these demands. The three sample datasets mentioned below represent three main types of question answering tasks: text-based reading comprehension (the focus of this research), logical reasoning / inference, and open questions.
+To compare different question answering techniques as well as to validate the effectiveness of new models, many benchmarking datasets and tools have been developed and adopted by researchers over the years. For instance, the TREC (Text Retrieval Conference) datasets are widely used for information retrieval benchmarking. For text comprehension and reasoning over text data, traditionally there was a lack of large, high-quality datasets suitable for the task. In recent years, several new datasets have been proposed to meet these demands. The three sample datasets mentioned below represent three main types of question answering tasks: text-based reading comprehension (the focus of this research), logical reasoning / inference, and open questions.
 
 \paragraph{CNN / Daily Mail }
 
@@ -163,18 +239,18 @@ Another technique of interest is to exploit the recursive structure of a sentenc
 \subsection{Question Answering with Neural Networks}
 
 \paragraph{Comparison of Traditional Approaches with Neural Network Methods}
-Collobert, et al. \cite{collobert2011natural} proposed an multi-purpose neural network model for four different NLP tasks. Although not engineered carefully to utilise elaborate linguistic features, the model compares competitively with the state-of-the-art non-neural network NLP systems at the time, with some networks reaching within 1\% of the best model. Even though not a question answering model, this demonstrates that neural network models have great potential in natural language modelling and understanding.
+Collobert, et al. \cite{collobert2011natural} proposed a multi-purpose neural network model for four different NLP tasks. Although not engineered carefully to utilise elaborate linguistic features, the model compares competitively with the state-of-the-art non-neural network NLP systems at the time, with some networks reaching within 1\% of the best model. Even though not a question answering model, this demonstrates that neural network models have great potential in natural language modelling and understanding.
 
 In Hermann, et al. \cite{hermann2015teaching} a comparison is made between the performance of traditional symbolic matching models and neural network models in CNN / Daily Mail reading comprehension tasks. The benchmarking shows an average 10\%+ improvement in accuracy of the best neural network models over the best symbolic matching models. 
 
-With more sophisticated model design (such as the architectures mentioned below), deep learning models have managed to exceed the performance of traditional NLP approaches in multiple domains. Apart from the improvement in methodology, the availability of large training data and the increase in computation power has contributed greatly to the rise of neual NLP models, as with other sub-fields of deep learning.
+With more sophisticated model design (such as the architectures mentioned below), deep learning models have managed to exceed the performance of traditional NLP approaches in multiple domains. Apart from the improvement in methodology, the availability of large training data and the increase in computation power has contributed greatly to the rise of neural NLP models, as with other sub-fields of deep learning.
 
 \paragraph{Memory Networks}
 One of the most notable works in question answering with reasoning and inference is the Memory Network (MemNN) \cite{weston2014memory}. The main contribution of this research over earlier deep models such as deep LSTM is the introduction of an explicit long-term memory module, allowing information in the network to flow not only from the start of one layer to the end (as enabled by RNN layers), but also from one “scan” of the document to the next, allowing previous states (representing the intermediate result of reasoning) to direct and affect the re-interpretation of the facts at the next time step (via an attention mechanism), thus making multi-step reasoning and fact extraction more viable. 
 
-The memory network model is further improved in Sukhbaatar, et al. \cite{sukhbaatar2015end}, allowing it to be trained end-to-end and to be easily appliable to different tasks. In this version of the network, it is able to be trained to map a couple (facts, question) to an answer, which is usually represented as a probability vector over a limited vocabulary. The results on the bAbI dataset from the above two research demonstrate that the Memory Network is capable of performing exceptionally well on multiple types of reasoning tasks, approaching or even reaching zero error rate in some cases, but are still struggling with certain types of tasks such as “positional reasoning” and “path finding” tasks \cite{weston2014memory, sukhbaatar2015end}.
+The memory network model is further improved in Sukhbaatar, et al. \cite{sukhbaatar2015end}, allowing it to be trained end-to-end and to be easily applicable to different tasks. In this version of the network, it is able to be trained to map a couple (facts, question) to an answer, which is usually represented as a probability vector over a limited vocabulary. The results on the bAbI dataset from the above two research demonstrate that the Memory Network is capable of performing exceptionally well on multiple types of reasoning tasks, approaching or even reaching zero error rate in some cases, but are still struggling with certain types of tasks such as “positional reasoning” and “path-finding” tasks \cite{weston2014memory, sukhbaatar2015end}.
 
-There are still many potential areas of improvement for the Memory Network model, some of which are addressed in later research works (such as the DMN meontioned below). The representation of input sentences and the interaction of questions and facts are achieved with weighed averaging and inner product respectively, which are relatively simple approaches. The memory size of the network determines the maximum number of facts the model is able to process at the same time, which is not efficient when the fact input is long and irrelevant facts have to stay in memory for the entire duration. Despite a lack of further investigation, we suspect that the number of “rescans” (or reasoning layers) in the network is related to the network’s ability to perform multi-step reasoning (it is observed in the results of Sukhbaatar et al. that more “hops” or reasoning layers generally increase the performance on multi-step reasoning tasks). It is difficult to estimate for a given task, how many reasoning layers is optimal, and it is unknown whether the model can trained with variable number of layers.
+There are still many potential areas of improvement for the Memory Network model, some of which are addressed in later research works (such as the DMN mentioned below). The representation of input sentences and the interaction of questions and facts are achieved with weighed averaging and inner product respectively, which are relatively simple approaches. The memory size of the network determines the maximum number of facts the model is able to process at the same time, which is not efficient when the fact input is long and irrelevant facts have to stay in memory for the entire duration. Despite a lack of further investigation, we suspect that the number of “rescans” (or reasoning layers) in the network is related to the network’s ability to perform multi-step reasoning (it is observed in the results of Sukhbaatar et al. that more “hops” or reasoning layers generally increase the performance on multi-step reasoning tasks). It is difficult to estimate for a given task, how many reasoning layers is optimal, and it is unknown whether the model can be trained with a variable number of layers.
 
 Other extensions to the memory network include the dynamic memory network (DMN) \cite{kumar2016ask} and key-value memory network \cite{miller2016key}.
 
@@ -189,22 +265,22 @@ The DNC is an interesting idea to combine the advantages of conventional and neu
 
 Neural NLP has also been applied to multilingual scenarios. The most obvious application of deep learning in multilingual NLP is machine translation. Most of the current neural machine translation models are based on the sequence-to-sequence encoder-decoder paradigm \cite{kalchbrenner2013recurrent, cho2014properties}, which uses an autoencoder-like architecture to transform input language representations into an intermediate representation ("encoding"), then decode back to natural language representations through a decoder network. Stacked RNNs are typically used for encoding and decoding of word sequences. The common theme of these methods is finding a shared representation of the source and target language as the "interlingua" for the translation task.
 
-Machine translation is regarded as one of the toughest problems in NLP, and thus it is undesirable to rely on machine translation as a preprocessing step for multilingual NLP. There has been several research on enabling multilingual representation sharing and knowledge transfer without the need to perform full machine translation. Since word embedding vectors are typically the entry point of a neural NLP process, finding shared embedded represenations for two or more languages has been an active area of research. Bilingual (or multilingual) word embeddings can be obtained by either aligning the embeddings in the training process, or aligning existing, pre-trained embeddings through projection or fine-tuning. Usually alignment during training are able to produce higher quality embeddings, but such embeddings might be prone to monolingual performance degradation and are more time- and resource-consuming to train. On the other hand, alignment after training might not produce as high performing results in cross-lingual tasks, but it is possible to avoid monolingual performance degradation and they are relatively cheap to compute.
+Machine translation is regarded as one of the toughest problems in NLP, and thus it is undesirable to rely on machine translation as a preprocessing step for multilingual NLP. There has been several researches on enabling multilingual representation sharing and knowledge transfer without the need to perform full machine translation. Since word embedding vectors are typically the entry point of a neural NLP process, finding shared embedded representations for two or more languages has been an active area of research. Bilingual (or multilingual) word embeddings can be obtained by either aligning the embeddings in the training process, or aligning existing, pre-trained embeddings through projection or fine-tuning. Usually alignment during training are able to produce higher quality embeddings, but such embeddings might be prone to monolingual performance degradation and are more time- and resource-consuming to train. On the other hand, alignment after training might not produce as high performing results in cross-lingual tasks, but it is possible to avoid monolingual performance degradation and they are relatively cheap to compute.
 
 In Gouws and S{\o}gaard, an algorithm to train a bilingual word embedding using an arbitrary base embedding algorithm and a set of equivalence relationships is proposed \cite{gouws2015simple}. During the training of word embeddings, words are randomly replaced with their equivalences with a set probability so that in a sense, equivalences share their contexts. One major benefit of this approach is that it is not dependent on parallel corpora, and the specific equivalence classes used can be chosen to benefit the task (such as using part-of-speech equivalence instead of meaning equivalence to benefit POS tagging)\cite{gouws2015simple}. However, this alignment approach requires that the embeddings be trained for each bilingual pair and each equivalence relation individually.
 
 In Gouws et al. \cite{gouws2015bilbowa}, a different alignment approach is proposed, in which word alignment is not needed. Instead, word embeddings are trained on monolingual data individually and then the dissimilarity data on a smaller, sentence-aligned parallel corpus is minimised. This approach has the benefit of requiring less granularity in its aligned data input as well as providing moderate speedup compared to previous algorithms, however it is still not as fast as fully-offline methods \cite{gouws2015bilbowa}.
 
 A typical offline alignment algorithm ("align after training") is Mikolov et al.'s translation matrix method \cite{mikolov2013exploiting}, in which a transformation matrix is used to project the vector representations of one language so that the distance between the source and target language vectors are minimised on a set of translation pairs. i.e.
-\[ \min_W || Wx_i - z_i||^2 \] where $i$ is the index of translation pairs, and $x_i$, $z_i$ are embedding vectors of the i-th word in language 1 and 2 repsectively.
+\[ \min_W || Wx_i - z_i||^2 \] where $i$ is the index of translation pairs, and $x_i$, $z_i$ are embedding vectors of the i-th word in language 1 and 2 respectively.
 
-Despite only using a simple linear transformation, this approach is surprisingly effective on top of being cheap to calculate, likely due to the fact that it does not significantly disrupt the linear relationships between monolingual words. A later research by Artetxe et al. found that the distance minimisation objective works best when all word vectors are normalised, and the transformation matrix $W$ is contrained to be orthogonal, as such a treatment perserves the relative distance and position of monolingual word vectors and minimises monolingual performance loss while still achieving good cross-lingual performance boost \cite{artetxe2016learning}. In the latest research on this topic by Artetxe et al., it is found that this offline alignment procedure does not necessarily have to rely on a large set of carefully-selected aligned words, and in the most extreme case, simply aligning the numerals between two languages and gradually expanding the alignment can already achieve reasonable performance in tasks such as word analogy \cite{artetxe2017learning}.
+Despite only using a simple linear transformation, this approach is surprisingly effective on top of being cheap to calculate, likely due to the fact that it does not significantly disrupt the linear relationships between monolingual words. A later research by Artetxe et al. found that the distance minimisation objective works best when all word vectors are normalised, and the transformation matrix $W$ is constrained to be orthogonal, as such a treatment preserves the relative distance and position of monolingual word vectors and minimises monolingual performance loss while still achieving good cross-lingual performance boost \cite{artetxe2016learning}. In the latest research on this topic by Artetxe et al., it is found that this offline alignment procedure does not necessarily have to rely on a large set of carefully-selected aligned words, and in the most extreme case, simply aligning the numerals between two languages and gradually expanding the alignment can already achieve reasonable performance in tasks such as word analogy \cite{artetxe2017learning}.
 
 
-\section{Challenges for NLP in Low Resource Languages}
+\section{Current Challenges and Research Question}
 
-The recent development in neural question answering systems have paved the way to a future of high-performance question answering systems. However, like many other deep learning-based solutions, these systems have one bottleneck in common, namely the availability of high-quality, high-volume training data. Unlike traditional NLP systems whose rules are manually designed by experts, neural NLP systems have to learn its lingustics knowledge and world knowledge from a large amount of input data. It is suggested that in certain NLP tasks, more than a million training examples are needed for the network to reach optimal performance \cite{banko2001mitigating}. 
-For question answering tasks, the datasets usually require human annotation, which increases the difficulty of compiling them significantly. Actually one of the first large text comprehension datasets for neural QA benchmarking, the CNN/Daily Mail dataset, circumvents the issue of human annotation by constructing questions from existing news headlines \cite{hermann2015teaching}, which significantly increases the quantity of the data that can be utilised, but also limits the quality of the final dataset. The CNN/Daily Mail dataset contains 380K QA pairs in the CNN section and 879K QA pairs in the Daily Mail section, making it one of the largest public datasets in this catagory.
+The recent development in neural question answering systems has paved the way to a future of high-performance question answering systems. However, like many other deep learning-based solutions, these systems have one bottleneck in common, namely the availability of high-quality, high-volume training data. Unlike traditional NLP systems whose rules are manually designed by experts, neural NLP systems have to learn its linguistics knowledge and world knowledge from a large amount of input data. It is suggested that in certain NLP tasks, more than a million training examples are needed for the network to reach optimal performance \cite{banko2001mitigating}. 
+For question answering tasks, the datasets usually require human annotation, which increases the difficulty of compiling them significantly. Actually one of the first large text comprehension datasets for neural QA benchmarking, the CNN/Daily Mail dataset, circumvents the issue of human annotation by constructing questions from existing news headlines \cite{hermann2015teaching}, which significantly increases the quantity of the data that can be utilised, but also limits the quality of the final dataset. The CNN/Daily Mail dataset contains 380K QA pairs in the CNN section and 879K QA pairs in the Daily Mail section, making it one of the largest public datasets in this category.
 
 The Maluuba NewsQA dataset \cite{trischler2016newsqa}, which is derived from the CNN / Daily Mail dataset, improves the question and answer quality of the original dataset by human annotation. It has a total size of 120K QA pairs.
 
@@ -213,12 +289,25 @@ Another frequently used dataset in recent research, the SQUAD dataset \cite{rajp
 Almost all of the current QA datasets for machine learning research are in English with a few exceptions, but even these few datasets in other languages are usually
 limited by data quantity or quality. The sheer size of the dataset required to train a performant QA system (or NLP systems in general) makes it especially challenging to develop a model for a low-resource language. The lack of high-quantity training dataset is even true for otherwise widely-spoken languages such as Spanish and Chinese. However, as we can imagine, the demand for question answering systems in these languages are not necessarily lower than English. This inevitably puts the onus of collecting a sizeable dataset in the target language on the developer of the system, which may be beyond their capabilities.
 
-Since building large datasets for different languages is difficult, it would be immensely helpful if instead of having to individually collect huge amount of data for each language, we could utilise the relative abundance of training data in resource-rich languages to boost the performance of QA systems trained with limited data in a resource-limited language. Therefore we are motivated to consider the use of transfer learning in QA tasks.
+Since building large datasets for different languages is difficult, it would be immensely helpful if instead of having to individually collect a huge amount of data for each language, we could utilise the relative abundance of training data in resource-rich languages to boost the performance of QA systems trained with limited data in a resource-limited language. Therefore we raise the following research question:
+
+\begin{center}
+	\fbox{\begin{minipage}{30em}
+		Is it possible to apply transfer learning to a question answering task so that models developed in one language can be used to improve the performance of models developed for another language?
+	\end{minipage}}
+\end{center}
+
+In particular, we have the following sub-questions:
+\begin{itemize}
+	\item[1] Is there anything in common between the same task in different languages that can be learned once and applied to a new language?
+	\item[2] Is there any common features among different languages that can be exploited to transfer linguistic knowledge between tasks?
+	\item[3] What kind of neural network architecture can be designed to benefit the most from transfer learning?
+\end{itemize}
 
 
 \section{Transfer Learning}
 
-If we consider two text comprehension tasks on two different languages, they are not entirely independent. There exist two main sources of information that can be shared between the tasks:
+If we consider two text comprehension tasks in two different languages, they are not entirely independent. There exist two main sources of information that can be shared between the tasks:
 \begin{itemize}
 	\item[1] The languages themselves have some common linguistic features that can be exploited, such as words with equivalent meanings, similar syntactical structures in two languages, etc.
 	\item[2] The task itself may require the same logical steps to complete, regardless of the language of its input and output.
@@ -235,16 +324,15 @@ Generally, for transfer learning in neural networks, there are two basic approac
 
 \section{Data Collection}
 
-For the purpose of transfer learning and performance comparison, we require two comparable corpora in two different languages with their associated QA pairs. However, as mentioned ealrlier in chapter 4, such datasets are not readily available. Therefore, it is necessary to compile a new bilingual dataset for our experiments. Construction of a human-annotated dataset is outside the scope of this research, but the same methodology used in the compilation of the CNN / Daily Mail dataset \cite{hermann2015teaching} is capable of constructing a reasonably accurate QA dataset from raw news articles without the need of human annotation. For our experiments, we use the CNN section of the CNN / Daily Mail dataset as the English corpus, and compile a new dataset in Spanish following the same methodology.
+For the purpose of transfer learning and performance comparison, we require two comparable corpora in two different languages with their associated QA pairs. However, as mentioned ealrlier in chapter 4, such datasets are not readily available. Therefore, it is necessary to compile a new bilingual dataset for our experiments. Construction of a human-annotated dataset is outside the scope of this research, but the same methodology used in the compilation of the CNN / Daily Mail dataset \cite{hermann2015teaching} is capable of constructing a reasonably accurate QA dataset from raw news articles without the need for human annotation. For our experiments, we use the CNN section of the CNN / Daily Mail dataset as the English corpus, and compile a new dataset in Spanish following the same methodology.
 
 \subsection{Data Collection Strategy}
 
-In Herrmann et al. \cite{hermann2015teaching}, the QA pairs are generated from news articles with several bullet points. Usually the bullet points on news websites are summary of one of the main topics of the article. By removing one of the key words in a bullet point and requiring the QA system to find best matching word from the article to fill in the blank, we are essentially creating a reading comprehension question for the given article. However, usually only questions generated by replacing unique entities result in meaningful reading comprehension questions, whereas questions generated from replacing common words could often be answered by applying grammatical rules or learning common collocations, therefore the question generation is based on the removal of named entities only. To generate a question from a news article, the bullet points and the news story (content body) is separated and paired up, then one of the named entities in the bullet point is replaced with a \textbf{@placeholder} marker to generate a question about the news story.
+In Herrmann et al. \cite{hermann2015teaching}, the QA pairs are generated from news articles with several bullet points. Usually the bullet points on news websites are a summary of one of the main topics of the article. By removing one of the key words in a bullet point and requiring the QA system to find the best matching word from the article to fill in the blank, we are essentially creating a reading comprehension question for the given article. However, usually only questions generated by replacing unique entities result in meaningful reading comprehension questions, whereas questions generated from replacing common words could often be answered by applying grammatical rules or learning common collocations, therefore the question generation is based on the removal of named entities only. To generate a question from a news article, the bullet points and the news story (content body) is separated and paired up, then one of the named entities in the bullet point is replaced with a \textbf{@placeholder} marker to generate a question about the news story.
 
-To further ensure that the system actually learns to perform reading comprehension rather than simple blank word deduction based on collocation (Such as automatically deduce "Olympics" from having "Rio" as the pervious word), in Hermann et al. \cite{hermann2015teaching}, all named entities are replaced with an entity marker \textbf{@entityX} where X is a random or ordinal integer. This percedure can be performed via named entity recognition.
+To further ensure that the system actually learns to perform reading comprehension rather than simple blank word deduction based on collocation (Such as automatically deduce "Olympics" from having "Rio" as the previous word), in Hermann et al. \cite{hermann2015teaching}, all named entities are replaced with an entity marker \textbf{@entityX} where X is a random or ordinal integer. This procedure can be performed via named entity recognition.
 
 \subsection{Source Corpus Compilation}
-
 \begin{center}
 	\begin{figure}
 		\includegraphics[width=\linewidth]{media/article.png}
@@ -252,7 +340,6 @@ To further ensure that the system actually learns to perform reading comprehensi
 		\label{fig:article}
 	\end{figure}
 \end{center}
-
 \begin{center}
 \begin{figure}
 \fbox{\begin{minipage}{30em}
@@ -297,17 +384,17 @@ To prepare a dataset in Spanish following the same format, we scrape a total of 
 	\end{figure}
 \end{center}
 
-To match the entity anonymisation used in the CNN / Daily Mail dataset, we also perform entity recognition and replacement in the Spanish corpus. Named entity recognition is performed via the Google Cloud Natural Language API (https://cloud.google.com/natural-language/) and a list of named entities (including unique names, locations and organisations) are generated for each (story, bullet point) pair. For each (story, bullet point) pair, matched entities (such as the full name and abbreivations of the same organisation, or full name and last name of a person) are replaced with the same entity marker. Finally, one of the replaced entities in the bullet point is replaced with the \textbf{@placeholder} marker to generate the question. One bullet point may be used to generate multiple questions if it contains more than one entity from the story. We generate a total of 76K QA pairs via this process. An example of generated QA pairs can be seen in figure \ref{fig:esqa}.
+To match the entity anonymisation used in the CNN / Daily Mail dataset, we also perform entity recognition and replacement in the Spanish corpus. Named entity recognition is performed via the Google Cloud Natural Language API (https://cloud.google.com/natural-language/) and a list of named entities (including unique names, locations and organisations) are generated for each (story, bullet point) pair. For each (story, bullet point) pair, matched entities (such as the full name and abbreviations of the same organisation, or full name and last name of a person) are replaced with the same entity marker. Finally, one of the replaced entities in the bullet point is replaced with the \textbf{@placeholder} marker to generate the question. One bullet point may be used to generate multiple questions if it contains more than one entity from the story. We generate a total of 76K QA pairs via this process. An example of generated QA pairs can be seen in figure \ref{fig:esqa}.
 
 \subsection{Word Embeddings}
 
-In order to compare the transfer learning performance of the networks using unaligned word embeddings and aligned word embeddings, we need individual embedding vectors for both English and Spanish, as well as the aligned versions of these embedding vectors. In our experiments, we use the pre-trained 300-dimensional FastText embeddings \cite{bojanowski2016enriching} due to its large training corpus (Wikipedia) and availability for both languages. For embedding alignment, we use the algorithm outlined in Artexte et al. (2016) \cite{artetxe2016learning} to calculate aligned embeddings via orthogonal transformation (details in the next section). For the aligned vocabulary dictionary needed for embedding mapping, we use the alignement dictionary of OpenSubtitles 2012 parallel text dataset \cite{TIEDEMANN12.463}, available on the Open Parallel Corpus website (http://opus.lingfil.uu.se/index.php). The original FastText embedding vectors for English and Spanish exceed 6.6G and 2.6G respectively, and are thus required to be trimmed to the subset of words that are present in our news article QA datasets. The trimmed version of the embedding vectors are 210MB and 260MB respectively and can be easily handled with our existing experiment setup.
+In order to compare the transfer learning performance of the networks using unaligned word embeddings and aligned word embeddings, we need individual embedding vectors for both English and Spanish, as well as the aligned versions of these embedding vectors. In our experiments, we use the pre-trained 300-dimensional FastText embeddings \cite{bojanowski2016enriching} due to its large training corpus (Wikipedia) and availability for both languages. For embedding alignment, we use the algorithm outlined in Artexte et al. (2016) \cite{artetxe2016learning} to calculate aligned embeddings via orthogonal transformation (details in the next section). For the aligned vocabulary dictionary needed for embedding mapping, we use the alignment dictionary of OpenSubtitles 2012 parallel text dataset \cite{TIEDEMANN12.463}, available on the Open Parallel Corpus website (http://opus.lingfil.uu.se/index.php). The original FastText embedding vectors for English and Spanish exceed 6.6G and 2.6G respectively, and are thus required to be trimmed to the subset of words that are present in our news article QA datasets. The trimmed version of the embedding vectors are 210MB and 260MB respectively and can be easily handled with our existing experiment setup.
 
 
 
 \section{Proposed Solutions and Model Description}
 
-We propose two network architectures for implementation of cross-lingual transfer learning. The first approach relies on sequential transfer learning and use fine-tuning of models trained on a resource-rich language as the main technique of model adaptation. We also apply word embedding alignment as an additional technique of knowledge sharing. The second approach relies on the joint training of models on two languages simultaneously to directly share intermediate representations of the network. In order to encourage the network to learn a truly shared representation for both languages rather than learning two representations in the same network, we also experiment with adding a penalty term optimised via adversarial training.
+We propose two network architectures for implementation of cross-lingual transfer learning. The first approach relies on sequential transfer learning and uses fine-tuning of models trained on a resource-rich language as the main technique of model adaptation. We also apply word embedding alignment as an additional technique of knowledge sharing. The second approach relies on the joint training of models on two languages simultaneously to directly share intermediate representations of the network. In order to encourage the network to learn a truly shared representation for both languages rather than learning two representations in the same network, we also experiment with adding a penalty term optimised via adversarial training.
 
 \subsection{Base QA Model}
 
@@ -319,7 +406,7 @@ We propose two network architectures for implementation of cross-lingual transfe
 	\end{figure}
 \end{center}
 
-For the base monlingual model for question answering, we adopt the improved attentive reader model described in Chen et al. \cite{chen2016thorough}. A basic outline of the network can be seen in figure \ref{fig:attentive}. The network applies two bidirectional RNNs on the embedding vectors of words in the story and question respectively, obtaining individual context-dependent word representations for each word in the story and a summary representation for the question. A similarity score is calculated between the representations of story words and the question to calculate the attention score of each word. A weighed sum of the story word representations (weighed by their attention scores) is then calculated to obtain the representation of the attended word(s). Finally, one or more dense layers act as the classifier to map the attended word(s) representation to the one-hot representation of the answer. The model can be formulated as follows:
+For the base monolingual model for question answering, we adopt the improved attentive reader model described in Chen et al. \cite{chen2016thorough}. A basic outline of the network can be seen in figure \ref{fig:attentive}. The network applies two bidirectional RNNs on the embedding vectors of words in the story and question respectively, obtaining individual context-dependent word representations of each word in the story and a summary representation for the question. A similarity score is calculated between the representations of story words and the question to calculate the attention score of each word. A weighted sum of the story word representations (weighed by their attention scores) is then calculated to obtain the representation of the attended word(s). Finally, one or more dense layers act as the classifier to map the attended word(s) representation to the one-hot representation of the answer. The model can be formulated as follows:
 
 \textit{Let $C_i$ be the i-th word in the story, and let Q be the question. Let $R_i$ be the context-dependent representation of $C_i$ and $r$ be the summary representation of the question. We use $a_i$ to denote the attention score, $u$ to denote the attended word representation and $o$ the answer's class. $M$ is a matrix parameter in the bilinear term $R_i^T M r$ to add more expressiveness of the similarity function (as compared to simpler similarity measures like dot product), as suggested by Chen et al. \cite{chen2016thorough}.}
 
@@ -339,7 +426,7 @@ Then we fine-tune the trained model $M_1$ on the $L_2$ data to adapt the model t
 \[  M_1'(C_2, Q_2) \to A_2\]
 where $M_1'$ is initialised with the parameters of $M_1$ and trained with lowered learning rate.
 
-In the most basic form of sequential transfer learning, the model is identical to the base monolingual QA model, except it is trained twice on two different languages. The intuition is that the weights of the network encode information about how to find a proper context-aware representation for word and phrases (mainly via the biRNN layer), as well as how to perform context matching and how to map attend entities back to answer word classes. Only the first step (calculating context-aware representations) is highly language-dependent, whereas the following steps can be though of as language-independent in the abstract sense. Therefore by fine-tuning the network, it should ideally "forget" about the language-dependent functions and retain the ability to perform the language-independent steps.
+In the most basic form of sequential transfer learning, the model is identical to the base monolingual QA model, except it is trained twice in two different languages. The intuition is that the weights of the network encode information about how to find a proper context-aware representation for word and phrases (mainly via the biRNN layer), as well as how to perform context matching and how to map attend entities back to answer word classes. Only the first step (calculating context-aware representations) is highly language-dependent, whereas the following steps can be though of as language-independent in the abstract sense. Therefore by fine-tuning the network, it should ideally "forget" about the language-dependent functions and retain the ability to perform the language-independent steps.
 
 We may also align the word embeddings so that similar words in the two different languages are represented by word vectors that are close to each other in the shared embedding space. In this way, we may reduce the distance between the representation of similar expressions in $L_1$ and $L_2$, and in turn hopefully reduce the difference between optimal weights of the network for $L_1$ and $L_2$. Perfect word embedding alignment of two languages is not possible, as it is equivalent to solving machine translation, which is an immensely difficult task. By applying the vector alignment technique introduced by Artetxe et al. \cite{artetxe2016learning}, it is possible to minimise the difference between two sets of word embeddings for a selected list of words. It is suggested in \cite{artetxe2016learning} as well as \cite{duong2017multilingual} that such an alignment procedure is also capable of aligning words outside of the alignment dictionary via the preservation of relative position of an arbitrary word relative to these "anchor" words, as discussed in chapter 3. Therefore, we may use the following objective to find the best projection for aligning two word embedding matrices:
 \[ arg\min_P ||PX_1 - X_2|| \]
@@ -376,7 +463,7 @@ Two of the main challenges of joint training a network on two tasks are:
 
 To avoid these issues, we have to find a way to encourage the network to share intermediate representations between tasks, or equivalently, penalise the network for using significantly different representations for separate tasks. Suppose $R^*$ is an ideal shared representation between tasks in $L_1$ and $L_2$, we wish to find a penalty term similar to the following form:
 \[ -\alpha (||R^* - R_1|| \cdot I_{L_1} + ||R^* - R_2|| \cdot I_{L_2}) \]
-(Here the $R$'s do not strictly correspond to the $R_i$'s in the base model. They may correspond to intermediate representations from $R_i$ and $r$ to $u$ in the orignal model, depending on implementation details, but the idea is the same: share representation between two tasks at some level of the network.)
+(Here the $R$'s do not strictly correspond to the $R_i$'s in the base model. They may correspond to intermediate representations from $R_i$ and $r$ to $u$ in the original model, depending on implementation details, but the idea is the same: share representation between two tasks at some level of the network.)
 
 In other words, a penalty term that penalises the network for adopting an intermediate representation that is too different from the ideal, shared representation. However, such a penalty function does not readily exist because we cannot know the ideal shared representation $R^*$ beforehand. However, we do know that if $R_1$ and $R_2$ deviates from $R^*$ too much, they will be different from each other, and if the average of $||R_1 - R_2||$ is significant, a discriminator network can be trained to distinguish them from each other and determine their source language just by looking at these intermediate representations. Therefore it is possible to train a discriminator network whose performance score can serve as the penalty term for not sharing representations.
 
@@ -404,7 +491,7 @@ We may write the joint training objective as follows:
 \[ argmin_{\Theta_\phi, \Theta_\gamma, -\Theta_\delta} [-logP(A|Q, C, \Theta_\phi, \Theta_\gamma) + \alpha \cdot log P(\lnot L|Q, C,\Theta_\phi, \Theta_\delta)] \]
 (we include $\Theta_\sigma$ in $\Theta_\phi$ for clarity)
 
-Notice that $\Theta_\phi$ and $\Theta_\gamma$ are parameters of the answerer network (part of the network in the base model), whereas $\Theta_\delta$ is the parameters of the discriminator network. This training objective follows the gradient of the answerer network weights to minimise answerer loss and maximise discriminator loss, and also simultaneously follows the negative gradient of the discriminator network weights to minimise the discriminator network loss. Intuitively there exists a competition between the answerer network and the discriminator network, where the discriminator network strives to best classify intermediate representations by their language, and the answerer network tries to confuse the discriminator network by outputing similar-looking intermediate representations. In this way, we are able to encourage the answerer network to produce an intermediate representation that shares as much information as possible between tasks from the two languages. The combined architecture of the answerer and discriminator network is shown in figure \ref{fig:adversa}.
+Notice that $\Theta_\phi$ and $\Theta_\gamma$ are parameters of the answerer network (part of the network in the base model), whereas $\Theta_\delta$ is the parameters of the discriminator network. This training objective follows the gradient of the answerer network weights to minimise answerer loss and maximise discriminator loss, and also simultaneously follows the negative gradient of the discriminator network weights to minimise the discriminator network loss. Intuitively there exists a competition between the answerer network and the discriminator network, where the discriminator network strives to best classify intermediate representations by their language, and the answerer network tries to confuse the discriminator network by outputting similar-looking intermediate representations. In this way, we are able to encourage the answerer network to produce an intermediate representation that shares as much information as possible between tasks from the two languages. The combined architecture of the answerer and discriminator network is shown in figure \ref{fig:adversa}.
 
 \section{Experiments}
 
@@ -423,7 +510,7 @@ Similar to \cite{chen2016thorough}, we adopt a few additional techniques to impr
 
 For adversarial training, a weight must be given to the discriminator loss to balance the importance of answerer objective and discriminator objective. The weight of the discriminator loss is set to 0.1 after parameter tuning.
 
-The experiments are run on a cluster with nVidia P100 GPUs. The average training time for single language model training takes approximately 2-3 hours before hitting early stopping criteria. Fine-tuning takes 1-2 hours on average. Joint models takes approximately 4-5 hours to converge.
+The experiments are run on a cluster with nVidia P100 GPUs. The average training time for single language model training takes approximately 2-3 hours before hitting early stopping criteria. Fine-tuning takes 1-2 hours on average. Joint models take approximately 4-5 hours to converge.
 
 \subsection{Results}
 
@@ -453,7 +540,7 @@ The rows represent English monolingual performance, Spanish monolingual performa
 We have the following observations based on the data:
 \begin{itemize}
 	\item In monolingual experiments without any transfer learning, the model performs much better on English tasks, most likely due to having 5 times as much training examples than Spanish.
-	\item Using aligned word embeddings do not noticeably degradate the monolingual performance of the QA model and in some cases even improve the performance, although the improvement is likely by chance. This confirms that word embedding alignment through orthogonal transformation preserves monolingual information.
+	\item Using aligned word embeddings do not noticeably degrade the monolingual performance of the QA model and in some cases even improve the performance, although the improvement is likely by chance. This confirms that word embedding alignment through orthogonal transformation preserves monolingual information.
 	\item Surprisingly, the best monolingual performance in English is achieved when using joint bilingual training with adversarial training. This is unexpected because the monolingual performance on Spanish data is much lower than English, so some moderate negative impact on English performance is expected even with the adversarial penalty term.
 	\item Sequential transfer learning through fine-tuning has a significant beneficial impact on Spanish task performance. This effect is large even when using unaligned embeddings.
 	\item Using aligned word embeddings further improves the performance of sequential transfer learning model on Spanish tasks, but not by as much as using fine-tuning itself.
@@ -475,16 +562,16 @@ We have the following observations based on the data:
 \paragraph{Sequential Transfer Learning}
 There are several interesting observations from the experiment results. The first major observation is the effectiveness of sequential transfer learning through fine-tuning. It is remarkable to see a simple and relatively naive approach achieving over 20\% accuracy gain. We further investigate the performance gain through fine-tuning by comparing the training curve with and without fine-tuning (figure \ref{fig:curve}).
 
-As we see in figure \ref{fig:curve}, without any form of transfer learning, learning with Spanish tasks are slower and peak at below 45\% accuracy. Through fine-tuning of models initialised with English tasks, the model not only converges faster, but also achieves a higher performance in the end. When aligned word embeddings are used along with fine-tuning, the model converges at a similar rate to the fine-tuned model with original embeddings, but achieves slightly lower loss an higher accraucy.
+As we see in figure \ref{fig:curve}, without any form of transfer learning, learning with Spanish tasks are slower and peak at below 45\% accuracy. Through fine-tuning of models initialised with English tasks, the model not only converges faster, but also achieves a higher performance in the end. When aligned word embeddings are used along with fine-tuning, the model converges at a similar rate to the fine-tuned model with original embeddings, but achieves slightly lower loss an higher accuracy.
 
-We have initially suspected that embedding alignment would be the more crucial step in sequential transfer learning, because it affects the input layer of the network and all downstream network parameters depend on it, also because shared word embeddings was shown to be helpful in other tasks like word analogy and machine translation \cite{mikolov2013exploiting,artetxe2017learning}. However, this is not the case according to our obseravtions. The majority of prediction accruacy gain comes not from word embedding alignment but fine-tuning of the network parameters. Although this appears to suggest the notion that fine-tuning plays a bigger role in cross-lingual transfer learning than aligned word embeddings, we have good reasons to believe it is highly task-dependent. The task we evaluate our models on favours the use of fine-tuning while does not rely on alignment of language representations as much. In particular:
+We have initially suspected that embedding alignment would be the more crucial step in sequential transfer learning, because it affects the input layer of the network and all downstream network parameters depend on it, also because shared word embeddings was shown to be helpful in other tasks like word analogy and machine translation \cite{mikolov2013exploiting,artetxe2017learning}. However, this is not the case according to our observations. The majority of prediction accuracy gain comes not from word embedding alignment but fine-tuning of the network parameters. Although this appears to suggest the notion that fine-tuning plays a bigger role in cross-lingual transfer learning than aligned word embeddings, we have good reasons to believe it is highly task-dependent. The task we evaluate our models on favours the use of fine-tuning while does not rely on alignment of language representations as much. In particular:
 \begin{itemize}
-	\item Questions generated from news article bullet points are relatively simple, and typically do not require deep understanding of the text to answer. The questions can often be answered by context matching alone, without much need for further logical reasoning, as observed in \cite{chen2016thorough} for the original CNN / Daily Mail dataset. Our expansion of the dataset into the Spanish language is based on the same data collection and processing procedure, and therefore our dataset also inherits the same issue. The implication of this is that answering these questions does not require much language-dependent knowledge or even meaning-related knowledge that should be transfered from the source language to the target language. Often, simply finding the same or similar words in the story as in the question is sufficient to locate the answer. This diminishes the need and usefulness of shared word embeddings, which primarily transfers knowledge about word meaning and word relationships.
+	\item Questions generated from news article bullet points are relatively simple, and typically do not require a deep understanding of the text to answer. The questions can often be answered by context matching alone, without much need for further logical reasoning, as observed in \cite{chen2016thorough} for the original CNN / Daily Mail dataset. Our expansion of the dataset into the Spanish language is based on the same data collection and processing procedure, and therefore our dataset also inherits the same issue. The implication of this is that answering these questions does not require much language-dependent knowledge or even meaning-related knowledge that should be transferred from the source language to the target language. Often, simply finding the same or similar words in the story as in the question is sufficient to locate the answer. This diminishes the need and usefulness of shared word embeddings, which primarily transfers knowledge about word meaning and word relationships.
 	\item We used entity replacement to swap out all named entities in the news articles, and we further restricted all possible question answers to be from the set of entity tokens. This has the unintended effect of simplifying the question answering process to finding the right context around an entity token that best resembles that of the \textbf{@placeholder} token, then mapping the entity token back to its entity ID (class). This task is not strongly dependent on the particular form of language representation, and it is reasonable to believe that a network trained to perform this context matching and entity mapping task in one language can be expected to perform well in a second language with relatively little adjustments.
 	\item The reason that the model trained on Spanish data alone does not perform as well as fine-tuned model is likely that it does not have enough training examples to match similar context between the story and question (in the attention layer's $\phi_\sigma(\cdot)$) and to map an attended entity back to its ID (in the final dense layer). These are relatively trivial tasks and are essentially the same task regardless of the source language, so we can expect the large improvement by inheriting the model parameters from an English model.
 \end{itemize}
 
-Nevertheless, we still see a performance increase with the introduction of aligned word embeddings, indicating that some language-related knowledge transfer is still helpful for this particular task. It is reasonable to believe that in a QA task where language-related knowledge is utlised more frequently (such as when synonyms are often used interchangeably or when some deduction based on topics are involved), word mebedding alignment might be able to provide a more substantial boost to performance.
+Nevertheless, we still see a performance increase with the introduction of aligned word embeddings, indicating that some language-related knowledge transfer is still helpful for this particular task. It is reasonable to believe that in a QA task where language-related knowledge is utlised more frequently (such as when synonyms are often used interchangeably or when some deduction based on topics are involved), word embedding alignment might be able to provide a more substantial boost to performance.
 
 \paragraph{Joint Training and Adversarial Training}
 Another interesting observation from the results is that although the use of adversarial training increases the performance of both languages compared to training them individually, the improvement of joint learning with adversarial training is not as large as using aligned embeddings with fine-tuning on the Spanish tasks. There are several likely reasons why fine-tuning appears to achieve higher performance:
@@ -496,21 +583,32 @@ Another interesting observation from the results is that although the use of adv
 However, it is worth noting that the adversarial training model on English tasks actually manages to outperform the model trained solely in English. Apart from actual sharing of knowledge between English and Spanish tasks, we believe another factor might also play a role in this outcome. It is possible that the discriminator also serves as extra regularisation during training, as overfitted examples are more likely to be distinct from other examples and might end up being easier from the discriminator to classify its language. By penalising high discriminator accuracy it is likely that we are also controlling overfitting of training examples.
 
 
+\section{Conclusion and Current Limitations}
 
-\section{Conclusion}
+Although limited in scope, our experiments have shown that cross-lingual transfer learning is indeed possible for our QA problem, and can be highly effective in certain scenarios. We have studied the cross-lingual performance of model fine-tuning, aligned word embeddings and joint training with adversarial training, and they have all shown promise in our experiment results. Fine-tuning is a simple approach with surprisingly high performance gain, which we believe is best achieved when the task does not heavily rely on linguistic knowledge that depend on the language itself. Word embedding alignment through orthogonal transformation is capable of increasing cross-lingual performance in all our experiment settings with minimal to no loss on monolingual performance, providing us with an inexpensive way of boosting transfer learning outcome. Joint training with adversarial learning provides better performance compared to both our monolingual results in the experiments, although for transfer learning from resource-rich language to resource-constrained language, it is still not achieving higher prediction accuracy than fine-tuning-based transfer learning, at least for this specific QA problem.
 
+There are multiple limitations of our current QA problem and research scope, including:
+\begin{itemize}
+	\item The quality of the dataset is not the most ideal. Due to our time and resource limitations, we have to rely on a machine-generated dataset. However, due to the flaws in data collection and preprocessing procedure and errors in entity recognition, the dataset itself is not perfectly accurate. Moreover, the types of questions that exist in the dataset are limited and are typically not challenging from a reading comprehension prospective.
+	\item We are only able to consider transfer learning between two languages due to scope limitations. However, the same dataset generation procedure allows multiple languages with varying degrees of similarity to be considered at the same time, which may provide better insight into how well each of the transfer learning schemes work.
+	\item The process of entity anonymisation is necessary for keeping the questions challenging, but as discussed in the last chapter, they remove much of the language dependency of the task and artificially lower the difficulty of learning. Realistic tasks are not likely to benefit from these artificial language independence of the tasks.
+	\item For consistency between joint training and sequential training, we do not fine-tune the embedding vectors throughout the experiments. yet arguably fine-tuning of embedding vectors should be beneficial for both monolingual and cross-lingual performance, as the pre-trained general-purpose word embeddings might not be ideal as task-specific word representations for a given QA task.
+\end{itemize}
 
 
 \section{Future Work}
+
+For future follow-up work of this research, we suggest the following directions:
+\begin{itemize}
+	\item Explore cross-lingual transfer learning in more challenging datasets and with more advanced base QA models. One of the advantages of methods studied in this research is that most of them can be adopted to arbitrary learning algorithms and network architectures, so studying their effect on different tasks and different models is possible and may provide great insight into how well these transfer learning methods work in different scenarios. As a special case, it would be interesting to explore the performance of a similar experiment setup to this research on a problem that does not have entity replacement and is thus more language-dependent inherently. In addition, it might be interesting to see whether some of the state-of-the-art models are compatible with these simple, inexpensive cross-lingual transfer learning techniques.
+	\item Explore how well the model performs when the embedding vectors themselves are fine-tuned. This is especially interesting when adversarial joint training is involved, as it may lead to the model eventually learning a shared task-specific embedding.
+	\item Explore the option of using adversarial training to directly perform embedding alignment.
+\end{itemize}
 
 
 \newpage
 \bibliographystyle{acm}
 \bibliography{thesis}
 
-
-\newpage
-\appendix
-\section{Appendix}
 
 \end{document}

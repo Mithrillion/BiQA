@@ -16,28 +16,27 @@
 \contentsline {paragraph}{Memory Networks}{11}
 \contentsline {paragraph}{Differentiable Neural Computer}{12}
 \contentsline {subsection}{\numberline {3.4}Multilingual NLP and Shared Embeddings}{13}
-\contentsline {section}{\numberline {4}Challenges for NLP in Low Resource Languages}{14}
-\contentsline {section}{\numberline {5}Transfer Learning}{15}
+\contentsline {section}{\numberline {4}Current Challenges and Research Question}{14}
+\contentsline {section}{\numberline {5}Transfer Learning}{16}
 \contentsline {section}{\numberline {6}Data Collection}{16}
-\contentsline {subsection}{\numberline {6.1}Data Collection Strategy}{16}
+\contentsline {subsection}{\numberline {6.1}Data Collection Strategy}{17}
 \contentsline {subsection}{\numberline {6.2}Source Corpus Compilation}{17}
-\contentsline {paragraph}{bullet points}{18}
-\contentsline {paragraph}{story}{18}
-\contentsline {subsection}{\numberline {6.3}Data Preprocessing for QA Task}{18}
+\contentsline {subsection}{\numberline {6.3}Data Preprocessing for QA Task}{17}
+\contentsline {paragraph}{bullet points}{19}
+\contentsline {paragraph}{story}{19}
 \contentsline {paragraph}{questions}{19}
 \contentsline {paragraph}{answers}{19}
 \contentsline {paragraph}{story}{19}
-\contentsline {subsection}{\numberline {6.4}Word Embeddings}{19}
+\contentsline {subsection}{\numberline {6.4}Word Embeddings}{20}
 \contentsline {section}{\numberline {7}Proposed Solutions and Model Description}{20}
-\contentsline {subsection}{\numberline {7.1}Base QA Model}{21}
-\contentsline {subsection}{\numberline {7.2}Sequential Transfer Learning}{21}
-\contentsline {subsection}{\numberline {7.3}Joint Learning with Adversarial Training}{23}
-\contentsline {section}{\numberline {8}Experiments}{26}
-\contentsline {subsection}{\numberline {8.1}Experiment Setup}{26}
-\contentsline {subsection}{\numberline {8.2}Results}{27}
-\contentsline {section}{\numberline {9}Discussions}{28}
-\contentsline {paragraph}{Sequential Transfer Learning}{28}
-\contentsline {paragraph}{Joint Training and Adversarial Training}{30}
-\contentsline {section}{\numberline {10}Conclusion}{30}
-\contentsline {section}{\numberline {11}Future Work}{30}
-\contentsline {section}{\numberline {A}Appendix}{34}
+\contentsline {subsection}{\numberline {7.1}Base QA Model}{22}
+\contentsline {subsection}{\numberline {7.2}Sequential Transfer Learning}{22}
+\contentsline {subsection}{\numberline {7.3}Joint Learning with Adversarial Training}{24}
+\contentsline {section}{\numberline {8}Experiments}{27}
+\contentsline {subsection}{\numberline {8.1}Experiment Setup}{27}
+\contentsline {subsection}{\numberline {8.2}Results}{28}
+\contentsline {section}{\numberline {9}Discussions}{29}
+\contentsline {paragraph}{Sequential Transfer Learning}{29}
+\contentsline {paragraph}{Joint Training and Adversarial Training}{31}
+\contentsline {section}{\numberline {10}Conclusion and Current Limitations}{31}
+\contentsline {section}{\numberline {11}Future Work}{32}
